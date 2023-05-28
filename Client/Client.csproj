@@ -7,4 +7,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="NetMQ" Version="4.0.1.12"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Events\Events.csproj"/>
+    </ItemGroup>
+
 </Project>
