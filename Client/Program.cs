@@ -1,21 +1,27 @@
-﻿using System.Text.Json;
-using Events;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NetMQ;
-using NetMQ.Sockets;
 using Serilog;
+using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-using var publisher = new PublisherSocket();
-publisher.Bind("tcp://*:5556");
+using var host = Host.CreateDefaultBuilder(args)
+    .UseSerilog()
+    .ConfigureAppConfiguration(builder => builder.AddJsonFile("appsettings.json"))
+    .ConfigureServices(services =>
+    {
+        services.AddSingleton<NetMQPoller>();
+        services.AddSingleton<Dealer>();
+        services.AddSingleton<Client.Client>();
+    })
+    .Build();
 
-// Sleep to avoid ZeroMQ slow joiner syndrome where a send immediately after a bind is lost
-Thread.Sleep(200);
+var client = host.Services.GetService<Client.Client>();
+ArgumentNullException.ThrowIfNull(client);
+client.Start();
 
-var joinRequest = new JoinRequest {PlayerId = Guid.NewGuid(), PlayerName = "Client 1"};
-var joinRequestEnvelope = Envelope.CreateFromEvent(joinRequest);
-
-Log.Information("Sending {MessageType}", joinRequestEnvelope.EventTypeStr);
-publisher.SendMoreFrame("Table").SendFrame(JsonSerializer.Serialize(joinRequestEnvelope));
+await host.RunAsync();

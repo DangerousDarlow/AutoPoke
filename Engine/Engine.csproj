@@ -21,4 +21,8 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ZeroMq\ZeroMq.csproj" />
+    </ItemGroup>
+
 </Project>

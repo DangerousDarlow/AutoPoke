@@ -3,37 +3,27 @@ using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
 
-namespace Engine;
+namespace ZeroMq;
 
-public class ZeroMq : IDisposable
+public class Subscriber
 {
     // Engine and clients subscribe to the Table topic. Events published to this topic are public and seen by everyone.
     private const string Topic = "Table";
-
     private readonly IConfiguration _configuration;
-    private readonly ILogger<ZeroMq> _logger;
-    private NetMQPoller? _poller;
+    private readonly ILogger<Subscriber> _logger;
+    private readonly NetMQPoller _poller;
     private SubscriberSocket? _subscriber;
 
-    public ZeroMq(IConfiguration configuration, ILogger<ZeroMq> logger)
+    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger)
     {
+        ArgumentNullException.ThrowIfNull(poller);
+        _poller = poller;
         _configuration = configuration;
         _logger = logger;
     }
 
-    public void Dispose()
+    public void Configure()
     {
-        _poller?.Stop();
-        _subscriber?.Close();
-        _poller?.Dispose();
-        _subscriber?.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
-    public void Start()
-    {
-        _logger.LogInformation("Starting ZeroMQ");
-
         var subscriptionAddress = _configuration.GetValue<string>("SubscriptionAddress");
         ArgumentException.ThrowIfNullOrEmpty(subscriptionAddress, nameof(subscriptionAddress));
 
@@ -53,8 +43,8 @@ public class ZeroMq : IDisposable
         };
         _logger.LogInformation("Subscribed to topic: {Topic}", Topic);
 
-        _poller = new NetMQPoller {_subscriber};
-        _poller.RunAsync();
+        _poller.Add(_subscriber ?? throw new InvalidOperationException("Subscriber socket not initialized"));
+
         _logger.LogInformation("Started poller");
     }
 }
