@@ -9,11 +9,12 @@ namespace ZeroMq;
 
 public class Dealer
 {
+    public delegate void ReceivedEventHandler(Envelope envelope);
+
     private readonly IConfiguration _configuration;
     private readonly ILogger<Dealer> _logger;
     private readonly NetMQPoller _poller;
     private DealerSocket? _dealer;
-    private Guid _playerId;
 
     public Dealer(NetMQPoller poller, IConfiguration configuration, ILogger<Dealer> logger)
     {
@@ -27,7 +28,6 @@ public class Dealer
 
     public void Configure(Guid playerId)
     {
-        _playerId = playerId;
         var dealerAddress = _configuration.GetValue<string>("DealerAddress");
         ArgumentException.ThrowIfNullOrEmpty(dealerAddress, nameof(dealerAddress));
 
@@ -39,12 +39,16 @@ public class Dealer
         _dealer.ReceiveReady += (sender, args) =>
         {
             var message = args.Socket.ReceiveMultipartMessage();
-            _logger.LogInformation("Dealer received from {From}", new Guid(message[0].ToByteArray()));
+            var envelope = Envelope.CreateFromJson(message[0].ConvertToString());
+            _logger.LogInformation("Received: event {Event}", envelope.EventType);
+
+            ReceivedEvent?.Invoke(envelope);
         };
 
-        _poller.Add(_dealer ?? throw new InvalidOperationException("Router socket not initialized"));
+        _poller.Add(_dealer ?? throw new InvalidOperationException("Socket not initialized"));
     }
 
-    public void Send(Envelope envelope) =>
-        _dealer?.SendMoreFrame(_playerId.ToByteArray()).SendFrame(JsonSerializer.Serialize(envelope));
+    public void Send(Envelope envelope) => _dealer?.SendFrame(JsonSerializer.Serialize(envelope));
+
+    public event ReceivedEventHandler? ReceivedEvent;
 }

@@ -17,6 +17,8 @@ public class Subscriber
     public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger)
     {
         ArgumentNullException.ThrowIfNull(poller);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(logger);
         _poller = poller;
         _configuration = configuration;
         _logger = logger;

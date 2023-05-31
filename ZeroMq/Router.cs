@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text.Json;
+using Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
@@ -7,6 +9,8 @@ namespace ZeroMq;
 
 public class Router
 {
+    public delegate void ReceivedEventHandler(Guid from, Envelope envelope);
+
     private readonly IConfiguration _configuration;
     private readonly ILogger<Router> _logger;
     private readonly NetMQPoller _poller;
@@ -15,6 +19,8 @@ public class Router
     public Router(NetMQPoller poller, IConfiguration configuration, ILogger<Router> logger)
     {
         ArgumentNullException.ThrowIfNull(poller);
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(logger);
         _poller = poller;
         _configuration = configuration;
         _logger = logger;
@@ -32,9 +38,18 @@ public class Router
         _router.ReceiveReady += (sender, args) =>
         {
             var message = args.Socket.ReceiveMultipartMessage();
-            _logger.LogInformation("Router from {From}", new Guid(message[0].ToByteArray()));
+            var from = new Guid(message[0].ToByteArray());
+            var envelope = Envelope.CreateFromJson(message[1].ConvertToString());
+            _logger.LogInformation("Received: from {From}, event {Event}", from, envelope.EventType);
+
+            ReceivedEvent?.Invoke(from, envelope);
         };
 
-        _poller.Add(_router ?? throw new InvalidOperationException("Router socket not initialized"));
+        _poller.Add(_router ?? throw new InvalidOperationException("Socket not initialized"));
     }
+
+    public void SendToSingle(Guid to, Envelope envelope) =>
+        _router?.SendMoreFrame(to.ToByteArray()).SendFrame(JsonSerializer.Serialize(envelope));
+
+    public event ReceivedEventHandler? ReceivedEvent;
 }

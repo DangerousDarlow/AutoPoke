@@ -15,6 +15,8 @@ public class Client
     private readonly Guid _playerId;
     private readonly NetMQPoller _poller;
 
+    private HoleCards? _playerCards;
+
     public Client(NetMQPoller poller, Dealer dealer, ILogger<Client> logger)
     {
         ArgumentNullException.ThrowIfNull(poller);
@@ -29,13 +31,22 @@ public class Client
     public void Start()
     {
         _dealer.Configure(_playerId);
-        _poller.RunAsync();
+        _dealer.ReceivedEvent += envelope =>
+        {
+            // The only event received directly from the engine should be the players hole cards
+            if (envelope.ExtractEvent() is not HoleCards playerCards)
+                return;
 
+            _playerCards = playerCards;
+            _logger.LogInformation("Received cards {PlayerId}", _playerCards);
+        };
+
+        _poller.RunAsync();
         _logger.LogInformation("Starting player: id '{PlayerId}', name '{PlayerName}'", _playerId, PlayerName);
 
         // Sleep to avoid ZeroMQ slow joiner syndrome where a send immediately after a bind is lost
         Thread.Sleep(200);
-        
+
         var joinRequest = new JoinRequest {PlayerId = _playerId, PlayerName = PlayerName};
         var joinRequestEnvelope = Envelope.CreateFromEvent(joinRequest);
 
