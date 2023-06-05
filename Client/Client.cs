@@ -38,7 +38,7 @@ public class Client
                 return;
 
             _playerCards = playerCards;
-            _logger.LogInformation("Received cards {PlayerId}", _playerCards);
+            _logger.LogInformation("Received cards {PlayerCards}", _playerCards);
         };
 
         _poller.RunAsync();
