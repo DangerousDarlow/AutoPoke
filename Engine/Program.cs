@@ -22,6 +22,9 @@ using var host = Host.CreateDefaultBuilder(args)
 
 var engine = host.Services.GetService<Engine.Engine>();
 ArgumentNullException.ThrowIfNull(engine);
-engine.Start();
+engine.Configure();
+
+var poller = host.Services.GetService<NetMQPoller>();
+poller?.RunAsync();
 
 await host.RunAsync();

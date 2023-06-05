@@ -1,34 +1,30 @@
 ﻿using Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NetMQ;
-using Serilog;
 using ZeroMq;
 
 namespace Client;
 
 public class Client
 {
-    private const string PlayerName = "Client";
-
     private readonly Dealer _dealer;
     private readonly ILogger<Client> _logger;
     private readonly Guid _playerId;
-    private readonly NetMQPoller _poller;
+    private readonly string? _playerName;
 
     private HoleCards? _playerCards;
 
-    public Client(NetMQPoller poller, Dealer dealer, ILogger<Client> logger)
+    public Client(Dealer dealer, IConfiguration configuration, ILogger<Client> logger)
     {
-        ArgumentNullException.ThrowIfNull(poller);
         ArgumentNullException.ThrowIfNull(dealer);
         ArgumentNullException.ThrowIfNull(logger);
-        _poller = poller;
         _dealer = dealer;
         _logger = logger;
         _playerId = Guid.NewGuid();
+        _playerName = configuration.GetValue<string>("PlayerName");
     }
 
-    public void Start()
+    public void Configure()
     {
         _dealer.Configure(_playerId);
         _dealer.ReceivedEvent += envelope =>
@@ -40,17 +36,13 @@ public class Client
             _playerCards = playerCards;
             _logger.LogInformation("Received cards {PlayerCards}", _playerCards);
         };
+    }
 
-        _poller.RunAsync();
-        _logger.LogInformation("Starting player: id '{PlayerId}', name '{PlayerName}'", _playerId, PlayerName);
-
-        // Sleep to avoid ZeroMQ slow joiner syndrome where a send immediately after a bind is lost
-        Thread.Sleep(200);
-
-        var joinRequest = new JoinRequest {PlayerId = _playerId, PlayerName = PlayerName};
+    public void SendJoinRequest()
+    {
+        _logger.LogInformation("Sending join request for player player: id '{PlayerId}', name '{PlayerName}'", _playerId, _playerName);
+        var joinRequest = new JoinRequest {PlayerId = _playerId, PlayerName = _playerName};
         var joinRequestEnvelope = Envelope.CreateFromEvent(joinRequest);
-
-        Log.Information("Sending {MessageType}", joinRequestEnvelope.EventTypeStr);
         _dealer.Send(joinRequestEnvelope);
     }
 }

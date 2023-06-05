@@ -22,6 +22,10 @@ using var host = Host.CreateDefaultBuilder(args)
 
 var client = host.Services.GetService<Client.Client>();
 ArgumentNullException.ThrowIfNull(client);
-client.Start();
+client.Configure();
+client.SendJoinRequest();
+
+var poller = host.Services.GetService<NetMQPoller>();
+poller?.RunAsync();
 
 await host.RunAsync();
