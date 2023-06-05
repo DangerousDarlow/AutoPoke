@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Events;
 
-namespace EventsTests;
+namespace Tests;
 
 public class EnvelopeTests
 {
