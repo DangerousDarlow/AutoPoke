@@ -34,7 +34,7 @@ public class Dealer
         _dealer = new DealerSocket();
         _dealer.Options.Identity = playerId.ToByteArray();
         _dealer.Connect(dealerAddress);
-        _logger.LogInformation("Dealer address: {RouterAddress}", dealerAddress);
+        _logger.LogInformation("Dealer address: {DealerAddress}", dealerAddress);
 
         _dealer.ReceiveReady += (sender, args) =>
         {
