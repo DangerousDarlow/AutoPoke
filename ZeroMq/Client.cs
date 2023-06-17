@@ -10,14 +10,14 @@ public class Client
     {
         ArgumentNullException.ThrowIfNull(dealer);
         _dealer = dealer;
-        ClientId = Guid.NewGuid();
+        Id = Guid.NewGuid();
     }
 
-    private Guid ClientId { get; }
+    public Guid Id { get; }
 
     public void Configure()
     {
-        _dealer.Configure(ClientId);
+        _dealer.Configure(Id);
         _dealer.ReceivedEvent += envelope => { ReceivedUnicastEvent?.Invoke(envelope); };
     }
 
