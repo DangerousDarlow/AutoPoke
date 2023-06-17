@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
@@ -16,13 +17,18 @@ using var host = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
-        services.AddSingleton<Engine.Engine>();
+        services.AddSingleton<Server>();
     })
     .Build();
 
-var engine = host.Services.GetService<Engine.Engine>();
+var engine = host.Services.GetService<Server>();
 ArgumentNullException.ThrowIfNull(engine);
 engine.Configure();
+engine.ReceivedUnicastEvent += envelope =>
+{
+    var testEvent = envelope.ExtractEvent() as TestEvent;
+    Log.Information("Received: {Value}", testEvent?.Value);
+};
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();

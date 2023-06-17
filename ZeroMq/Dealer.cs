@@ -9,8 +9,6 @@ namespace ZeroMq;
 
 public class Dealer
 {
-    public delegate void ReceivedEventHandler(Envelope envelope);
-
     private readonly IConfiguration _configuration;
     private readonly ILogger<Dealer> _logger;
     private readonly NetMQPoller _poller;
@@ -50,5 +48,5 @@ public class Dealer
 
     public void Send(Envelope envelope) => _dealer?.SendFrame(JsonSerializer.Serialize(envelope));
 
-    public event ReceivedEventHandler? ReceivedEvent;
+    public event Delegates.EnvelopeHandler? ReceivedEvent;
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
@@ -16,14 +17,14 @@ using var host = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Dealer>();
-        services.AddSingleton<Client.Client>();
+        services.AddSingleton<Client>();
     })
     .Build();
 
-var client = host.Services.GetService<Client.Client>();
+var client = host.Services.GetService<Client>();
 ArgumentNullException.ThrowIfNull(client);
 client.Configure();
-client.SendJoinRequest();
+client.SendToServer(Envelope.CreateFromEvent(new TestEvent {Value = "Hello World"}));
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();

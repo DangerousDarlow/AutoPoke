@@ -7,7 +7,7 @@ namespace ZeroMq;
 
 public class Subscriber
 {
-    // Engine and clients subscribe to the Table topic. Events published to this topic are public and seen by everyone.
+    // Server and clients subscribe to the Table topic. Events published to this topic are public and seen by everyone.
     private const string Topic = "Table";
     private readonly IConfiguration _configuration;
     private readonly ILogger<Subscriber> _logger;
