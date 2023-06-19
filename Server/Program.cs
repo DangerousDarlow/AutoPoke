@@ -17,6 +17,8 @@ using var host = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
+        services.AddSingleton<Publisher>();
+        services.AddSingleton<Subscriber>();
         services.AddSingleton<Server>();
     })
     .Build();

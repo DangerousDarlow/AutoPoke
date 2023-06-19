@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetMQ;
 using NetMQ.Sockets;
@@ -7,7 +8,6 @@ namespace ZeroMq;
 
 public class Subscriber
 {
-    // Server and clients subscribe to the Table topic. Events published to this topic are public and seen by everyone.
     private const string Topic = "Table";
     private readonly IConfiguration _configuration;
     private readonly ILogger<Subscriber> _logger;
@@ -26,27 +26,29 @@ public class Subscriber
 
     public void Configure()
     {
-        var subscriptionAddress = _configuration.GetValue<string>("SubscriptionAddress");
-        ArgumentException.ThrowIfNullOrEmpty(subscriptionAddress, nameof(subscriptionAddress));
+        var subscriberAddress = _configuration.GetValue<string>("SubscriberAddress");
+        ArgumentException.ThrowIfNullOrEmpty(subscriberAddress, nameof(subscriberAddress));
 
         _subscriber = new SubscriberSocket();
-        _subscriber.Connect(subscriptionAddress);
-        _logger.LogInformation("Subscription address: {SubscriptionAddress}", subscriptionAddress);
-
+        _subscriber.Connect(subscriberAddress);
         _subscriber.Subscribe(Topic);
+        _logger.LogInformation("Subscriber address: {SubscriberAddress}", subscriberAddress);
+
         _subscriber.ReceiveReady += (sender, args) =>
         {
             var topic = args.Socket.ReceiveFrameString();
             if (topic != Topic)
                 throw new Exception($"Unexpected topic '{topic}' received");
 
-            var payload = args.Socket.ReceiveFrameString();
-            _logger.LogInformation("Received {Message}", payload);
+            var message = args.Socket.ReceiveFrameString();
+            var envelope = Envelope.CreateFromJson(message);
+            _logger.LogInformation("Received: event {Event}", envelope.EventType);
+
+            ReceivedEvent?.Invoke(envelope);
         };
-        _logger.LogInformation("Subscribed to topic: {Topic}", Topic);
 
-        _poller.Add(_subscriber ?? throw new InvalidOperationException("Subscriber socket not initialized"));
-
-        _logger.LogInformation("Started poller");
+        _poller.Add(_subscriber ?? throw new InvalidOperationException("Socket not initialized"));
     }
+
+    public event Delegates.EnvelopeHandler? ReceivedEvent;
 }

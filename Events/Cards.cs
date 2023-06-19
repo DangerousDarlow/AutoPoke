@@ -1,4 +1,5 @@
 ﻿// ReSharper disable UnusedMember.Global
+
 namespace Events;
 
 public static class Cards
@@ -16,7 +17,7 @@ public static class Cards
     public static readonly Card JackSpades = new(Rank.Jack, Suit.Spades);
     public static readonly Card QueenSpades = new(Rank.Queen, Suit.Spades);
     public static readonly Card KingSpades = new(Rank.King, Suit.Spades);
-    
+
     public static readonly Card AceHearts = new(Rank.Ace, Suit.Hearts);
     public static readonly Card TwoHearts = new(Rank.Two, Suit.Hearts);
     public static readonly Card ThreeHearts = new(Rank.Three, Suit.Hearts);
@@ -30,7 +31,7 @@ public static class Cards
     public static readonly Card JackHearts = new(Rank.Jack, Suit.Hearts);
     public static readonly Card QueenHearts = new(Rank.Queen, Suit.Hearts);
     public static readonly Card KingHearts = new(Rank.King, Suit.Hearts);
-    
+
     public static readonly Card AceClubs = new(Rank.Ace, Suit.Clubs);
     public static readonly Card TwoClubs = new(Rank.Two, Suit.Clubs);
     public static readonly Card ThreeClubs = new(Rank.Three, Suit.Clubs);
@@ -44,7 +45,7 @@ public static class Cards
     public static readonly Card JackClubs = new(Rank.Jack, Suit.Clubs);
     public static readonly Card QueenClubs = new(Rank.Queen, Suit.Clubs);
     public static readonly Card KingClubs = new(Rank.King, Suit.Clubs);
-    
+
     public static readonly Card AceDiamonds = new(Rank.Ace, Suit.Diamonds);
     public static readonly Card TwoDiamonds = new(Rank.Two, Suit.Diamonds);
     public static readonly Card ThreeDiamonds = new(Rank.Three, Suit.Diamonds);

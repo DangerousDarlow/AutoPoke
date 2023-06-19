@@ -47,9 +47,9 @@ public class Router
         _poller.Add(_router ?? throw new InvalidOperationException("Socket not initialized"));
     }
 
-    public void Unbind() => _router?.Unbind(_routerAddress!);
-
     public void Send(Guid to, Envelope envelope) => _router?.SendMoreFrame(to.ToByteArray()).SendFrame(JsonSerializer.Serialize(envelope));
+
+    public void Unbind() => _router?.Unbind(_routerAddress!);
 
     public event Delegates.EnvelopeHandler? ReceivedEvent;
 }
