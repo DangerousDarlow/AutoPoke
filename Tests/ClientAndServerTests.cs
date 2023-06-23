@@ -21,19 +21,56 @@ public class ClientAndServerTests
     private Publisher _serverPublisher = null!;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
+    {
+        IConfiguration serverConfiguration;
+        IConfiguration client1Configuration;
+        IConfiguration client2Configuration;
+        switch (TestContext.CurrentContext.Test.Name)
+        {
+            case "Multicast_event_sent_by_client_is_received_by_server_and_other_clients":
+            {
+                serverConfiguration = CreateServerConfiguration(5557);
+                client1Configuration = CreateClientConfiguration(5556, "Client1");
+                client2Configuration = CreateClientConfiguration(5558, "Client2");
+                break;
+            }
+
+            default:
+            {
+                serverConfiguration = CreateServerConfiguration(5556);
+                client1Configuration = CreateClientConfiguration(5557, "Client1");
+                client2Configuration = CreateClientConfiguration(5558, "Client2");
+                break;
+            }
+        }
+
+        SetUp(serverConfiguration, client1Configuration, client2Configuration);
+    }
+
+    private static IConfiguration CreateServerConfiguration(int publisherPort) => new ConfigurationBuilder()
+        .AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            {"RouterAddress", "tcp://*:5555"},
+            {"PublisherAddress", $"tcp://*:{publisherPort}"},
+            {"SubscriberAddress", "tcp://localhost:5556"}
+        })
+        .Build();
+
+    private static IConfiguration CreateClientConfiguration(int publisherPort, string clientName) => new ConfigurationBuilder()
+        .AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            {"DealerAddress", "tcp://localhost:5555"},
+            {"PublisherAddress", $"tcp://*:{publisherPort}"},
+            {"SubscriberAddress", "tcp://localhost:5556"},
+            {"ClientName", clientName}
+        })
+        .Build();
+
+    private void SetUp(IConfiguration serverConfiguration, IConfiguration client1Configuration, IConfiguration client2Configuration)
     {
         _poller = new NetMQPoller();
         _poller.RunAsync();
-
-        var serverConfiguration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                {"RouterAddress", "tcp://*:5555"},
-                {"PublisherAddress", "tcp://*:5556"},
-                {"SubscriberAddress", "tcp://localhost:5556"}
-            })
-            .Build();
 
         var routerLogger = new Mock<ILogger<Router>>();
         var publisherLogger = new Mock<ILogger<Publisher>>();
@@ -45,16 +82,6 @@ public class ClientAndServerTests
         _server = new Server(_router, _serverPublisher, serverSubscriber);
         _server.Configure();
 
-        var client1Configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                {"DealerAddress", "tcp://localhost:5555"},
-                {"PublisherAddress", "tcp://*:5557"},
-                {"SubscriberAddress", "tcp://localhost:5556"},
-                {"ClientName", "Client1"}
-            })
-            .Build();
-
         var dealerLogger = new Mock<ILogger<Dealer>>();
 
         var client1Dealer = new Dealer(_poller, client1Configuration, dealerLogger.Object);
@@ -62,16 +89,6 @@ public class ClientAndServerTests
         var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
         _client1 = new Client(client1Dealer, _client1Publisher, client1Subscriber);
         _client1.Configure();
-
-        var client2Configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                {"DealerAddress", "tcp://localhost:5555"},
-                {"PublisherAddress", "tcp://*:5558"},
-                {"SubscriberAddress", "tcp://localhost:5556"},
-                {"ClientName", "Client2"}
-            })
-            .Build();
 
         var client2Dealer = new Dealer(_poller, client2Configuration, dealerLogger.Object);
         _client2Publisher = new Publisher(_poller, client2Configuration, publisherLogger.Object);
@@ -148,7 +165,7 @@ public class ClientAndServerTests
         _client2.ReceivedMulticastEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
 
         var sent = new TestEvent {Value = Guid.NewGuid().ToString()};
-        _server.SendToAllClients(Envelope.CreateFromEvent(sent));
+        _server.SendToAll(Envelope.CreateFromEvent(sent));
 
         // Alas a sleep is necessary to allow zero mq to poll
         Thread.Sleep(SleepDuration);
@@ -167,5 +184,29 @@ public class ClientAndServerTests
     [Test]
     public void Multicast_event_sent_by_client_is_received_by_server_and_other_clients()
     {
+        TestEvent? receivedServer = null;
+        _server.ReceivedMulticastEvent += envelope => { receivedServer = envelope.ExtractEvent() as TestEvent; };
+
+        TestEvent? receivedClient1 = null;
+        _client1.ReceivedMulticastEvent += envelope => { receivedClient1 = envelope.ExtractEvent() as TestEvent; };
+
+        TestEvent? receivedClient2 = null;
+        _client2.ReceivedMulticastEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
+
+        var sent = new TestEvent {Value = Guid.NewGuid().ToString()};
+        _client1.SendToAll(Envelope.CreateFromEvent(sent));
+
+        // Alas a sleep is necessary to allow zero mq to poll
+        Thread.Sleep(SleepDuration);
+
+        Assert.That(receivedClient1, Is.Null);
+
+        Assert.That(receivedClient2, Is.Not.Null);
+        Assert.That(receivedClient2!.Value, Is.Not.Null);
+        Assert.That(receivedClient2.Value, Is.EqualTo(sent.Value));
+
+        Assert.That(receivedServer, Is.Not.Null);
+        Assert.That(receivedServer!.Value, Is.Not.Null);
+        Assert.That(receivedServer.Value, Is.EqualTo(sent.Value));
     }
 }

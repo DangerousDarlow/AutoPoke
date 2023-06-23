@@ -6,12 +6,14 @@ namespace Events;
 public class Envelope
 {
     [JsonConstructor]
-    public Envelope(string eventTypeStr, string eventJson)
+    public Envelope(string eventTypeStr, string eventJson, Guid origin)
     {
         ArgumentException.ThrowIfNullOrEmpty(eventTypeStr);
         ArgumentException.ThrowIfNullOrEmpty(eventJson);
+        ArgumentNullException.ThrowIfNull(eventJson);
         EventTypeStr = eventTypeStr;
         EventJson = eventJson;
+        Origin = origin;
 
         var eventType = typeof(IEvent).Assembly.GetType(EventTypeStr);
         ArgumentNullException.ThrowIfNull(eventType);
@@ -31,6 +33,7 @@ public class Envelope
     [JsonIgnore] public Type EventType { get; }
     public string EventTypeStr { get; }
     public string EventJson { get; }
+    public Guid Origin { get; set; }
 
     public IEvent ExtractEvent()
     {
@@ -46,13 +49,15 @@ public class Envelope
         ArgumentNullException.ThrowIfNull(@event);
         var type = @event.GetType();
         var typeStr = type.FullName ?? type.Name;
-        return new Envelope(type, typeStr, JsonSerializer.Serialize(@event));
+        var envelope = new Envelope(type, typeStr, JsonSerializer.Serialize(@event));
+        ArgumentNullException.ThrowIfNull(envelope);
+        return envelope;
     }
 
     public static Envelope CreateFromJson(string json)
     {
-        var wrapper = JsonSerializer.Deserialize<Envelope>(json);
-        ArgumentNullException.ThrowIfNull(wrapper);
-        return wrapper;
+        var envelope = JsonSerializer.Deserialize<Envelope>(json);
+        ArgumentNullException.ThrowIfNull(envelope);
+        return envelope;
     }
 }

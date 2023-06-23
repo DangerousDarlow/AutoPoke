@@ -8,16 +8,20 @@ public class EnvelopeTests
     [Test]
     public void Event_can_be_serialized_and_deserialized_using_envelope()
     {
-        var testIn = new TestEvent {Value = "Super!"};
-        var wrapperIn = Envelope.CreateFromEvent(testIn);
+        var from = Guid.NewGuid();
 
-        var json = JsonSerializer.Serialize(wrapperIn);
+        var eventIn = new TestEvent {Value = "Super!"};
+        var envelopeIn = Envelope.CreateFromEvent(eventIn);
+        envelopeIn.Origin = from;
 
-        var wrapperOut = Envelope.CreateFromJson(json);
-        Assert.That(wrapperOut.EventType, Is.EqualTo(typeof(TestEvent)));
+        var serialisedEnvelope = JsonSerializer.Serialize(envelopeIn);
 
-        var testOut = wrapperOut.ExtractEvent() as TestEvent;
-        Assert.That(testOut, Is.Not.Null);
-        Assert.That(testOut!.Value, Is.EqualTo(testIn.Value));
+        var envelopeOut = Envelope.CreateFromJson(serialisedEnvelope);
+        Assert.That(envelopeOut.EventType, Is.EqualTo(typeof(TestEvent)));
+        Assert.That(envelopeOut.Origin, Is.EqualTo(from));
+
+        var eventOut = envelopeOut.ExtractEvent() as TestEvent;
+        Assert.That(eventOut, Is.Not.Null);
+        Assert.That(eventOut!.Value, Is.EqualTo(eventIn.Value));
     }
 }

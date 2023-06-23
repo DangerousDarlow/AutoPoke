@@ -18,6 +18,8 @@ public class Server
         _subscriber = subscriber;
     }
 
+    public Guid Id { get; } = Guid.NewGuid();
+
     public void Configure()
     {
         _router.Configure();
@@ -26,12 +28,24 @@ public class Server
         _publisher.Configure();
 
         _subscriber.Configure();
-        _subscriber.ReceivedEvent += envelope => { ReceivedMulticastEvent?.Invoke(envelope); };
+        _subscriber.ReceivedEvent += envelope =>
+        {
+            if (envelope.Origin != Id)
+                ReceivedMulticastEvent?.Invoke(envelope);
+        };
     }
 
-    public void SendToSingleClient(Envelope envelope, Guid client) => _router.Send(client, envelope);
+    public void SendToSingleClient(Envelope envelope, Guid client)
+    {
+        envelope.Origin = Id;
+        _router.Send(client, envelope);
+    }
 
-    public void SendToAllClients(Envelope envelope) => _publisher.Send(envelope);
+    public void SendToAll(Envelope envelope)
+    {
+        envelope.Origin = Id;
+        _publisher.Send(envelope);
+    }
 
     public event Delegates.EnvelopeHandler? ReceivedUnicastEvent;
 
