@@ -26,7 +26,8 @@ using var host = Host.CreateDefaultBuilder(args)
 var client = host.Services.GetService<Client>();
 ArgumentNullException.ThrowIfNull(client);
 client.Configure();
-client.SendToServer(Envelope.CreateFromEvent(new TestEvent {Value = "Hello World"}));
+client.SendToServer(Envelope.CreateFromEvent(new TestEvent {Value = "Hello Server"}));
+client.SendToAll(Envelope.CreateFromEvent(new TestEvent {Value = "Hello All"}));
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();

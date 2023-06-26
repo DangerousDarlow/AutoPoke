@@ -11,10 +11,11 @@ public class Subscriber
     private const string Topic = "Table";
     private readonly IConfiguration _configuration;
     private readonly ILogger<Subscriber> _logger;
+    private readonly string? _debugName;
     private readonly NetMQPoller _poller;
     private SubscriberSocket? _subscriber;
 
-    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger)
+    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger, string? debugName = null)
     {
         ArgumentNullException.ThrowIfNull(poller);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -22,6 +23,7 @@ public class Subscriber
         _poller = poller;
         _configuration = configuration;
         _logger = logger;
+        _debugName = debugName;
     }
 
     public void Configure()

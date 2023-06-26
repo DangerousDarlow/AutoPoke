@@ -4,8 +4,8 @@ namespace ZeroMq;
 
 public class Server
 {
-    private readonly Publisher _publisher;
     private readonly Router _router;
+    private readonly Publisher _publisher;
     private readonly Subscriber _subscriber;
 
     public Server(Router router, Publisher publisher, Subscriber subscriber)

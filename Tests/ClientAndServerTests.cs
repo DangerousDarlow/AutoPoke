@@ -25,14 +25,12 @@ public class ClientAndServerTests
     {
         IConfiguration serverConfiguration;
         IConfiguration client1Configuration;
-        IConfiguration client2Configuration;
         switch (TestContext.CurrentContext.Test.Name)
         {
             case "Multicast_event_sent_by_client_is_received_by_server_and_other_clients":
             {
                 serverConfiguration = CreateServerConfiguration(5557);
                 client1Configuration = CreateClientConfiguration(5556, "Client1");
-                client2Configuration = CreateClientConfiguration(5558, "Client2");
                 break;
             }
 
@@ -40,12 +38,11 @@ public class ClientAndServerTests
             {
                 serverConfiguration = CreateServerConfiguration(5556);
                 client1Configuration = CreateClientConfiguration(5557, "Client1");
-                client2Configuration = CreateClientConfiguration(5558, "Client2");
                 break;
             }
         }
 
-        SetUp(serverConfiguration, client1Configuration, client2Configuration);
+        SetUp(serverConfiguration, client1Configuration);
     }
 
     private static IConfiguration CreateServerConfiguration(int publisherPort) => new ConfigurationBuilder()
@@ -67,7 +64,7 @@ public class ClientAndServerTests
         })
         .Build();
 
-    private void SetUp(IConfiguration serverConfiguration, IConfiguration client1Configuration, IConfiguration client2Configuration)
+    private void SetUp(IConfiguration serverConfiguration, IConfiguration client1Configuration)
     {
         _poller = new NetMQPoller();
         _poller.RunAsync();
@@ -78,7 +75,7 @@ public class ClientAndServerTests
 
         _router = new Router(_poller, serverConfiguration, routerLogger.Object);
         _serverPublisher = new Publisher(_poller, serverConfiguration, publisherLogger.Object);
-        var serverSubscriber = new Subscriber(_poller, serverConfiguration, subscriberLogger.Object);
+        var serverSubscriber = new Subscriber(_poller, serverConfiguration, subscriberLogger.Object, "Server");
         _server = new Server(_router, _serverPublisher, serverSubscriber);
         _server.Configure();
 
@@ -86,13 +83,14 @@ public class ClientAndServerTests
 
         var client1Dealer = new Dealer(_poller, client1Configuration, dealerLogger.Object);
         _client1Publisher = new Publisher(_poller, client1Configuration, publisherLogger.Object);
-        var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
+        var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object, "Client1");
         _client1 = new Client(client1Dealer, _client1Publisher, client1Subscriber);
         _client1.Configure();
 
+        var client2Configuration = CreateClientConfiguration(5558, "Client2");
         var client2Dealer = new Dealer(_poller, client2Configuration, dealerLogger.Object);
         _client2Publisher = new Publisher(_poller, client2Configuration, publisherLogger.Object);
-        var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
+        var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object, "Client2");
         _client2 = new Client(client2Dealer, _client2Publisher, client2Subscriber);
         _client2.Configure();
     }
