@@ -22,11 +22,11 @@ using var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-var engine = host.Services.GetService<Server>();
-ArgumentNullException.ThrowIfNull(engine);
-engine.Configure();
+var server = host.Services.GetService<Server>();
+ArgumentNullException.ThrowIfNull(server);
+server.Configure();
 
-engine.ReceivedEvent += envelope =>
+server.ReceivedEvent += envelope =>
 {
     var testEvent = envelope.ExtractEvent() as TestEvent;
     Log.Information("Received: {Value}", testEvent?.Value);
