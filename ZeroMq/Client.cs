@@ -32,7 +32,7 @@ public class Client
         _dealer.Send(envelope);
     }
 
-    public event Delegates.EnvelopeHandler? ReceivedUnicastEvent;
+    public event Socket.EnvelopeHandler? ReceivedUnicastEvent;
 
-    public event Delegates.EnvelopeHandler? ReceivedMulticastEvent;
+    public event Socket.EnvelopeHandler? ReceivedMulticastEvent;
 }

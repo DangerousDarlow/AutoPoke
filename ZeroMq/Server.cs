@@ -37,5 +37,5 @@ public class Server
         _publisher.Send(envelope);
     }
 
-    public event Delegates.EnvelopeHandler? ReceivedEvent;
+    public event Socket.EnvelopeHandler? ReceivedEvent;
 }
