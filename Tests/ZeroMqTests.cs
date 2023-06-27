@@ -7,7 +7,7 @@ using ZeroMq;
 
 namespace Tests;
 
-public class ClientAndServerTests
+public class ZeroMqTests
 {
     private static readonly TimeSpan SleepDuration = TimeSpan.FromMilliseconds(10);
 
