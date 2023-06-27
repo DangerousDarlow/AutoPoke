@@ -10,12 +10,12 @@ public class Subscriber
 {
     private const string Topic = "Table";
     private readonly IConfiguration _configuration;
+    private readonly TimeSpan _connectSleep = TimeSpan.FromMilliseconds(200);
     private readonly ILogger<Subscriber> _logger;
-    private readonly string? _debugName;
     private readonly NetMQPoller _poller;
     private SubscriberSocket? _subscriber;
 
-    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger, string? debugName = null)
+    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger)
     {
         ArgumentNullException.ThrowIfNull(poller);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -23,7 +23,6 @@ public class Subscriber
         _poller = poller;
         _configuration = configuration;
         _logger = logger;
-        _debugName = debugName;
     }
 
     public void Configure()
@@ -33,6 +32,10 @@ public class Subscriber
 
         _subscriber = new SubscriberSocket();
         _subscriber.Connect(subscriberAddress);
+
+        // Without this sleep the subscription can silently fail (dependant on timing)
+        Thread.Sleep(_connectSleep);
+
         _subscriber.Subscribe(Topic);
         _logger.LogInformation("Subscriber address: {SubscriberAddress}", subscriberAddress);
 

@@ -75,7 +75,7 @@ public class ClientAndServerTests
 
         _router = new Router(_poller, serverConfiguration, routerLogger.Object);
         _serverPublisher = new Publisher(_poller, serverConfiguration, publisherLogger.Object);
-        var serverSubscriber = new Subscriber(_poller, serverConfiguration, subscriberLogger.Object, "Server");
+        var serverSubscriber = new Subscriber(_poller, serverConfiguration, subscriberLogger.Object);
         _server = new Server(_router, _serverPublisher, serverSubscriber);
         _server.Configure();
 
@@ -83,14 +83,14 @@ public class ClientAndServerTests
 
         var client1Dealer = new Dealer(_poller, client1Configuration, dealerLogger.Object);
         _client1Publisher = new Publisher(_poller, client1Configuration, publisherLogger.Object);
-        var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object, "Client1");
+        var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
         _client1 = new Client(client1Dealer, _client1Publisher, client1Subscriber);
         _client1.Configure();
 
         var client2Configuration = CreateClientConfiguration(5558, "Client2");
         var client2Dealer = new Dealer(_poller, client2Configuration, dealerLogger.Object);
         _client2Publisher = new Publisher(_poller, client2Configuration, publisherLogger.Object);
-        var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object, "Client2");
+        var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
         _client2 = new Client(client2Dealer, _client2Publisher, client2Subscriber);
         _client2.Configure();
     }
