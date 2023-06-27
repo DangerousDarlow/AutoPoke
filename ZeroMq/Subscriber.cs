@@ -6,28 +6,19 @@ using NetMQ.Sockets;
 
 namespace ZeroMq;
 
-public class Subscriber
+public class Subscriber : Socket
 {
     private const string Topic = "Table";
-    private readonly IConfiguration _configuration;
     private readonly TimeSpan _connectSleep = TimeSpan.FromMilliseconds(200);
-    private readonly ILogger<Subscriber> _logger;
-    private readonly NetMQPoller _poller;
     private SubscriberSocket? _subscriber;
 
-    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger)
+    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger) : base(poller, configuration, logger)
     {
-        ArgumentNullException.ThrowIfNull(poller);
-        ArgumentNullException.ThrowIfNull(configuration);
-        ArgumentNullException.ThrowIfNull(logger);
-        _poller = poller;
-        _configuration = configuration;
-        _logger = logger;
     }
 
     public void Configure()
     {
-        var subscriberAddress = _configuration.GetValue<string>("SubscriberAddress");
+        var subscriberAddress = Configuration.GetValue<string>("SubscriberAddress");
         ArgumentException.ThrowIfNullOrEmpty(subscriberAddress, nameof(subscriberAddress));
 
         _subscriber = new SubscriberSocket();
@@ -37,7 +28,7 @@ public class Subscriber
         Thread.Sleep(_connectSleep);
 
         _subscriber.Subscribe(Topic);
-        _logger.LogInformation("Subscriber address: {SubscriberAddress}", subscriberAddress);
+        Logger.LogInformation("Subscriber address: {SubscriberAddress}", subscriberAddress);
 
         _subscriber.ReceiveReady += (sender, args) =>
         {
@@ -47,13 +38,12 @@ public class Subscriber
 
             var message = args.Socket.ReceiveFrameString();
             var envelope = Envelope.CreateFromJson(message);
-            _logger.LogInformation("Received: event {Event}", envelope.EventType);
 
             ReceivedEvent?.Invoke(envelope);
         };
 
-        _poller.Add(_subscriber ?? throw new InvalidOperationException("Socket not initialized"));
+        Poller.Add(_subscriber ?? throw new InvalidOperationException("Socket not initialized"));
     }
 
-    public event Delegates.EnvelopeHandler? ReceivedEvent;
+    public event EnvelopeHandler? ReceivedEvent;
 }
