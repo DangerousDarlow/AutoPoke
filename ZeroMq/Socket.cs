@@ -7,11 +7,11 @@ namespace ZeroMq;
 
 public abstract class Socket
 {
-    protected readonly NetMQPoller Poller;
+    public delegate void EnvelopeHandler(Envelope envelope);
+
     protected readonly IConfiguration Configuration;
     protected readonly ILogger<Socket> Logger;
-
-    public delegate void EnvelopeHandler(Envelope envelope);
+    protected readonly NetMQPoller Poller;
 
     protected Socket(NetMQPoller poller, IConfiguration configuration, ILogger<Socket> logger)
     {

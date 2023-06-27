@@ -4,18 +4,15 @@ namespace ZeroMq;
 
 public class Server
 {
-    private readonly Router _router;
     private readonly Publisher _publisher;
-    private readonly Subscriber _subscriber;
+    private readonly Router _router;
 
-    public Server(Router router, Publisher publisher, Subscriber subscriber)
+    public Server(Router router, Publisher publisher)
     {
         ArgumentNullException.ThrowIfNull(router);
         ArgumentNullException.ThrowIfNull(publisher);
-        ArgumentNullException.ThrowIfNull(subscriber);
         _router = router;
         _publisher = publisher;
-        _subscriber = subscriber;
     }
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -23,16 +20,9 @@ public class Server
     public void Configure()
     {
         _router.Configure();
-        _router.ReceivedEvent += envelope => { ReceivedUnicastEvent?.Invoke(envelope); };
+        _router.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
 
         _publisher.Configure();
-
-        _subscriber.Configure();
-        _subscriber.ReceivedEvent += envelope =>
-        {
-            if (envelope.Origin != Id)
-                ReceivedMulticastEvent?.Invoke(envelope);
-        };
     }
 
     public void SendToSingleClient(Envelope envelope, Guid client)
@@ -47,7 +37,5 @@ public class Server
         _publisher.Send(envelope);
     }
 
-    public event Delegates.EnvelopeHandler? ReceivedUnicastEvent;
-
-    public event Delegates.EnvelopeHandler? ReceivedMulticastEvent;
+    public event Delegates.EnvelopeHandler? ReceivedEvent;
 }

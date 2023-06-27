@@ -18,7 +18,6 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
         services.AddSingleton<Publisher>();
-        services.AddSingleton<Subscriber>();
         services.AddSingleton<Server>();
     })
     .Build();
@@ -27,16 +26,10 @@ var engine = host.Services.GetService<Server>();
 ArgumentNullException.ThrowIfNull(engine);
 engine.Configure();
 
-engine.ReceivedUnicastEvent += envelope =>
+engine.ReceivedEvent += envelope =>
 {
     var testEvent = envelope.ExtractEvent() as TestEvent;
-    Log.Information("Received Unicast: {Value}", testEvent?.Value);
-};
-
-engine.ReceivedMulticastEvent += envelope =>
-{
-    var testEvent = envelope.ExtractEvent() as TestEvent;
-    Log.Information("Received Multicast: {Value}", testEvent?.Value);
+    Log.Information("Received: {Value}", testEvent?.Value);
 };
 
 var poller = host.Services.GetService<NetMQPoller>();

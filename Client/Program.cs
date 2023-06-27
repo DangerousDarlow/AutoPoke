@@ -17,7 +17,6 @@ using var host = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Dealer>();
-        services.AddSingleton<Publisher>();
         services.AddSingleton<Subscriber>();
         services.AddSingleton<Client>();
     })
@@ -27,7 +26,6 @@ var client = host.Services.GetService<Client>();
 ArgumentNullException.ThrowIfNull(client);
 client.Configure();
 client.SendToServer(Envelope.CreateFromEvent(new TestEvent {Value = "Hello Server"}));
-client.SendToAll(Envelope.CreateFromEvent(new TestEvent {Value = "Hello All"}));
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();

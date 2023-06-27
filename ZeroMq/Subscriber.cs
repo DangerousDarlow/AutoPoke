@@ -9,7 +9,7 @@ namespace ZeroMq;
 public class Subscriber : Socket
 {
     private const string Topic = "Table";
-    private readonly TimeSpan _connectSleep = TimeSpan.FromMilliseconds(200);
+    private readonly TimeSpan _afterConnectSleepDuration = TimeSpan.FromMilliseconds(200);
     private SubscriberSocket? _subscriber;
 
     public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger) : base(poller, configuration, logger)
@@ -25,7 +25,7 @@ public class Subscriber : Socket
         _subscriber.Connect(subscriberAddress);
 
         // Without this sleep the subscription can silently fail (dependant on timing)
-        Thread.Sleep(_connectSleep);
+        Thread.Sleep(_afterConnectSleepDuration);
 
         _subscriber.Subscribe(Topic);
         Logger.LogInformation("Subscriber address: {SubscriberAddress}", subscriberAddress);
