@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Client\Client.csproj" />
+        <ProjectReference Include="..\Logic\Logic.csproj" />
         <ProjectReference Include="..\Server\Server.csproj" />
         <ProjectReference Include="..\Events\Events.csproj" />
         <ProjectReference Include="..\ZeroMq\ZeroMq.csproj" />

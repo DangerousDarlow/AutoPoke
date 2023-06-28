@@ -79,10 +79,10 @@ public class ZeroMqTests
     public void Unicast_event_sent_by_server_is_received_by_single_client_only()
     {
         TestEvent? receivedClient1 = null;
-        _client1.ReceivedUnicastEvent += envelope => { receivedClient1 = envelope.ExtractEvent() as TestEvent; };
+        _client1.ReceivedEvent += envelope => { receivedClient1 = envelope.ExtractEvent() as TestEvent; };
 
         TestEvent? receivedClient2 = null;
-        _client2.ReceivedUnicastEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
+        _client2.ReceivedEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
 
         var sent = new TestEvent {Value = Guid.NewGuid().ToString()};
         _server.SendToSingleClient(Envelope.CreateFromEvent(sent), _client1.Id);
@@ -104,7 +104,7 @@ public class ZeroMqTests
         _server.ReceivedEvent += envelope => { receivedServer = envelope.ExtractEvent() as TestEvent; };
 
         TestEvent? receivedClient2 = null;
-        _client2.ReceivedUnicastEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
+        _client2.ReceivedEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
 
         var sent = new TestEvent {Value = Guid.NewGuid().ToString()};
         _client1.SendToServer(Envelope.CreateFromEvent(sent));
@@ -123,13 +123,13 @@ public class ZeroMqTests
     public void Multicast_event_sent_by_server_is_received_by_clients()
     {
         TestEvent? receivedClient1 = null;
-        _client1.ReceivedMulticastEvent += envelope => { receivedClient1 = envelope.ExtractEvent() as TestEvent; };
+        _client1.ReceivedEvent += envelope => { receivedClient1 = envelope.ExtractEvent() as TestEvent; };
 
         TestEvent? receivedClient2 = null;
-        _client2.ReceivedMulticastEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
+        _client2.ReceivedEvent += envelope => { receivedClient2 = envelope.ExtractEvent() as TestEvent; };
 
         var sent = new TestEvent {Value = Guid.NewGuid().ToString()};
-        _server.SendToAll(Envelope.CreateFromEvent(sent));
+        _server.SendToAllClients(Envelope.CreateFromEvent(sent));
 
         // Alas a sleep is necessary to allow zero mq to poll
         Thread.Sleep(SleepDuration);

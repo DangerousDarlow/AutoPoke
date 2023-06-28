@@ -1,4 +1,4 @@
-﻿using Events;
+﻿using Logic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,16 +18,20 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Dealer>();
         services.AddSingleton<Subscriber>();
-        services.AddSingleton<Client>();
+        services.AddSingleton<IClient, Client>(provider =>
+        {
+            var client = new Client(provider.GetRequiredService<Dealer>(), provider.GetRequiredService<Subscriber>());
+            client.Configure();
+            return client;
+        });
+        services.AddSingleton<Player>(provider => new Player("Player 1", provider.GetRequiredService<IClient>()));
     })
     .Build();
 
-var client = host.Services.GetService<Client>();
-ArgumentNullException.ThrowIfNull(client);
-client.Configure();
-client.SendToServer(Envelope.CreateFromEvent(new TestEvent {Value = "Hello Server"}));
-
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();
+
+var player = host.Services.GetService<Player>();
+player?.Join();
 
 await host.RunAsync();

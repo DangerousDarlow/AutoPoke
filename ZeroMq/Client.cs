@@ -2,7 +2,14 @@
 
 namespace ZeroMq;
 
-public class Client
+public interface IClient
+{
+    Guid Id { get; }
+    void SendToServer(Envelope envelope);
+    event Socket.EnvelopeHandler? ReceivedEvent;
+}
+
+public class Client : IClient
 {
     private readonly Dealer _dealer;
     private readonly Subscriber _subscriber;
@@ -20,10 +27,10 @@ public class Client
     public void Configure()
     {
         _dealer.Configure(Id);
-        _dealer.ReceivedEvent += envelope => { ReceivedUnicastEvent?.Invoke(envelope); };
+        _dealer.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
 
         _subscriber.Configure();
-        _subscriber.ReceivedEvent += envelope => { ReceivedMulticastEvent?.Invoke(envelope); };
+        _subscriber.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
     }
 
     public void SendToServer(Envelope envelope)
@@ -32,7 +39,5 @@ public class Client
         _dealer.Send(envelope);
     }
 
-    public event Socket.EnvelopeHandler? ReceivedUnicastEvent;
-
-    public event Socket.EnvelopeHandler? ReceivedMulticastEvent;
+    public event Socket.EnvelopeHandler? ReceivedEvent;
 }

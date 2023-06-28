@@ -2,7 +2,15 @@
 
 namespace ZeroMq;
 
-public class Server
+public interface IServer
+{
+    Guid Id { get; }
+    void SendToSingleClient(Envelope envelope, Guid client);
+    void SendToAllClients(Envelope envelope);
+    event Socket.EnvelopeHandler? ReceivedEvent;
+}
+
+public class Server : IServer
 {
     private readonly Publisher _publisher;
     private readonly Router _router;
@@ -31,7 +39,7 @@ public class Server
         _router.Send(client, envelope);
     }
 
-    public void SendToAll(Envelope envelope)
+    public void SendToAllClients(Envelope envelope)
     {
         envelope.Origin = Id;
         _publisher.Send(envelope);

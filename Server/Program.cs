@@ -18,18 +18,21 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
         services.AddSingleton<Publisher>();
-        services.AddSingleton<Server>();
+        services.AddSingleton<IServer, Server>(provider =>
+        {
+            var server = new Server(provider.GetRequiredService<Router>(), provider.GetRequiredService<Publisher>());
+            server.Configure();
+            return server;
+        });
     })
     .Build();
 
-var server = host.Services.GetService<Server>();
+var server = host.Services.GetService<IServer>();
 ArgumentNullException.ThrowIfNull(server);
-server.Configure();
 
 server.ReceivedEvent += envelope =>
 {
-    var testEvent = envelope.ExtractEvent() as TestEvent;
-    Log.Information("Received: {Value}", testEvent?.Value);
+    Log.Information("Received: {Value}", envelope.EventType);
 };
 
 var poller = host.Services.GetService<NetMQPoller>();

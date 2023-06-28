@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Events\Events.csproj" />
+        <ProjectReference Include="..\Logic\Logic.csproj" />
         <ProjectReference Include="..\ZeroMq\ZeroMq.csproj" />
     </ItemGroup>
 
