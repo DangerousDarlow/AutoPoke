@@ -1,4 +1,4 @@
-﻿using Events;
+﻿using Logic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,7 +7,10 @@ using Serilog;
 using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{SourceContext}>{NewLine}{Exception}"
+    )
     .CreateLogger();
 
 using var host = Host.CreateDefaultBuilder(args)
@@ -24,18 +27,15 @@ using var host = Host.CreateDefaultBuilder(args)
             server.Configure();
             return server;
         });
+        services.AddSingleton<IEngine, Engine>();
+        services.AddAllImplementations<IEngineEventHandler>();
     })
     .Build();
 
-var server = host.Services.GetService<IServer>();
-ArgumentNullException.ThrowIfNull(server);
-
-server.ReceivedEvent += envelope =>
-{
-    Log.Information("Received: {Value}", envelope.EventType);
-};
-
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();
+
+// Necessary to cause Engine and dependencies to be instantiated
+host.Services.GetService<IEngine>();
 
 await host.RunAsync();

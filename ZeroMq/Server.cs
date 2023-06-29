@@ -25,14 +25,6 @@ public class Server : IServer
 
     public Guid Id { get; } = Guid.NewGuid();
 
-    public void Configure()
-    {
-        _router.Configure();
-        _router.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
-
-        _publisher.Configure();
-    }
-
     public void SendToSingleClient(Envelope envelope, Guid client)
     {
         envelope.Origin = Id;
@@ -46,4 +38,12 @@ public class Server : IServer
     }
 
     public event Socket.EnvelopeHandler? ReceivedEvent;
+
+    public void Configure()
+    {
+        _router.Configure();
+        _router.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
+
+        _publisher.Configure();
+    }
 }

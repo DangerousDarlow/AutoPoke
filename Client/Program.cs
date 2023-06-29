@@ -7,7 +7,10 @@ using Serilog;
 using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{SourceContext}>{NewLine}{Exception}"
+    )
     .CreateLogger();
 
 using var host = Host.CreateDefaultBuilder(args)

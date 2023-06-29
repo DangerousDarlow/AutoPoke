@@ -24,6 +24,14 @@ public class Client : IClient
 
     public Guid Id { get; } = Guid.NewGuid();
 
+    public void SendToServer(Envelope envelope)
+    {
+        envelope.Origin = Id;
+        _dealer.Send(envelope);
+    }
+
+    public event Socket.EnvelopeHandler? ReceivedEvent;
+
     public void Configure()
     {
         _dealer.Configure(Id);
@@ -32,12 +40,4 @@ public class Client : IClient
         _subscriber.Configure();
         _subscriber.ReceivedEvent += envelope => { ReceivedEvent?.Invoke(envelope); };
     }
-
-    public void SendToServer(Envelope envelope)
-    {
-        envelope.Origin = Id;
-        _dealer.Send(envelope);
-    }
-
-    public event Socket.EnvelopeHandler? ReceivedEvent;
 }
