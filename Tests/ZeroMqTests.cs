@@ -14,8 +14,8 @@ public class ZeroMqTests
     private static readonly IOptions<ZeroMqConfiguration> ClientConfiguration = CreateClientConfiguration();
     private static readonly IOptions<ZeroMqConfiguration> ServerConfiguration = CreateServerConfiguration();
 
-    private Client _client1 = null!;
-    private Client _client2 = null!;
+    private ZeroMq.Client _client1 = null!;
+    private ZeroMq.Client _client2 = null!;
     private NetMQPoller _poller = null!;
     private Router _router = null!;
     private Server _server = null!;
@@ -40,12 +40,12 @@ public class ZeroMqTests
 
         var client1Dealer = new Dealer(_poller, ClientConfiguration, dealerLogger.Object);
         var client1Subscriber = new Subscriber(_poller, ClientConfiguration, subscriberLogger.Object);
-        _client1 = new Client(client1Dealer, client1Subscriber);
+        _client1 = new ZeroMq.Client(client1Dealer, client1Subscriber);
         _client1.Configure();
 
         var client2Dealer = new Dealer(_poller, ClientConfiguration, dealerLogger.Object);
         var client2Subscriber = new Subscriber(_poller, ClientConfiguration, subscriberLogger.Object);
-        _client2 = new Client(client2Dealer, client2Subscriber);
+        _client2 = new ZeroMq.Client(client2Dealer, client2Subscriber);
         _client2.Configure();
     }
 

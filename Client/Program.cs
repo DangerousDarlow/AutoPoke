@@ -1,5 +1,4 @@
-﻿using Logic;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
@@ -22,20 +21,20 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Dealer>();
         services.AddSingleton<Subscriber>();
-        services.AddSingleton<IClient, Client>(provider =>
+        services.AddSingleton<IClient, ZeroMq.Client>(provider =>
         {
-            var client = new Client(provider.GetRequiredService<Dealer>(), provider.GetRequiredService<Subscriber>());
+            var client = new ZeroMq.Client(provider.GetRequiredService<Dealer>(), provider.GetRequiredService<Subscriber>());
             client.Configure();
             return client;
         });
-        services.AddSingleton<Player>(provider => new Player("Player 1", provider.GetRequiredService<IClient>()));
+        services.AddSingleton<Client.Player>(provider => new Client.Player("Player 1", provider.GetRequiredService<IClient>()));
     })
     .Build();
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();
 
-var player = host.Services.GetService<Player>();
+var player = host.Services.GetService<Client.Player>();
 player?.Join();
 
 await host.RunAsync();

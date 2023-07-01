@@ -1,23 +1,8 @@
-﻿using Events;
-using ZeroMq;
+﻿namespace Logic;
 
-namespace Logic;
-
-public class Player
+public record Player
 {
-    private readonly IClient _client;
+    public Guid Id { get; init; }
 
-    public Player(string name, IClient client)
-    {
-        Name = name;
-        _client = client;
-    }
-
-    public Guid Id => _client.Id;
-
-    public string Name { get; }
-
-    public void Join() => Send(Envelope.CreateFromEvent(new JoinRequest {PlayerId = Id, PlayerName = Name}));
-
-    private void Send(Envelope envelope) => _client.SendToServer(envelope);
+    public string Name { get; set; } = null!;
 }

@@ -7,7 +7,6 @@ namespace Tests;
 
 public class EngineTests
 {
-    private const string PlayerName = "Player1";
     private IEngine _engine = null!;
     private MockZeroMq _mockZeroMq = null!;
     private Player _player = null!;
@@ -30,15 +29,15 @@ public class EngineTests
                 return mockZeroMq.CreateClient();
             })
             .AddSingleton<IEngine, Engine>()
-            .AddSingleton<Player>(provider => new Player(PlayerName, provider.GetRequiredService<IClient>()))
             .AddAllImplementations<IEngineEventHandler>()
             .AddLogging();
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
         _mockZeroMq = serviceProvider.GetService<MockZeroMq>()!;
+        var playerId = _mockZeroMq.CreateClient().Id;
+        _player = new Player {Id = playerId, Name = "Player 1"};
         _engine = serviceProvider.GetService<IEngine>()!;
-        _player = serviceProvider.GetService<Player>()!;
     }
 
     [Test]
