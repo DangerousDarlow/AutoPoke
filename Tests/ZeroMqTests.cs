@@ -11,6 +11,9 @@ public class ZeroMqTests
 {
     private static readonly TimeSpan SleepDuration = TimeSpan.FromMilliseconds(10);
 
+    private static readonly IOptions<ZeroMqConfiguration> ClientConfiguration = CreateClientConfiguration();
+    private static readonly IOptions<ZeroMqConfiguration> ServerConfiguration = CreateServerConfiguration();
+
     private Client _client1 = null!;
     private Client _client2 = null!;
     private NetMQPoller _poller = null!;
@@ -28,23 +31,20 @@ public class ZeroMqTests
         var publisherLogger = new Mock<ILogger<Publisher>>();
         var subscriberLogger = new Mock<ILogger<Subscriber>>();
 
-        var serverConfiguration = CreateServerConfiguration();
-        _router = new Router(_poller, serverConfiguration, routerLogger.Object);
-        _serverPublisher = new Publisher(_poller, serverConfiguration, publisherLogger.Object);
+        _router = new Router(_poller, ServerConfiguration, routerLogger.Object);
+        _serverPublisher = new Publisher(_poller, ServerConfiguration, publisherLogger.Object);
         _server = new Server(_router, _serverPublisher);
         _server.Configure();
 
         var dealerLogger = new Mock<ILogger<Dealer>>();
 
-        var client1Configuration = CreateClientConfiguration();
-        var client1Dealer = new Dealer(_poller, client1Configuration, dealerLogger.Object);
-        var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
+        var client1Dealer = new Dealer(_poller, ClientConfiguration, dealerLogger.Object);
+        var client1Subscriber = new Subscriber(_poller, ClientConfiguration, subscriberLogger.Object);
         _client1 = new Client(client1Dealer, client1Subscriber);
         _client1.Configure();
 
-        var client2Configuration = CreateClientConfiguration();
-        var client2Dealer = new Dealer(_poller, client2Configuration, dealerLogger.Object);
-        var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
+        var client2Dealer = new Dealer(_poller, ClientConfiguration, dealerLogger.Object);
+        var client2Subscriber = new Subscriber(_poller, ClientConfiguration, subscriberLogger.Object);
         _client2 = new Client(client2Dealer, client2Subscriber);
         _client2.Configure();
     }
