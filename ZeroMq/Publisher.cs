@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Events;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 
@@ -13,13 +13,13 @@ public class Publisher : Socket
     private PublisherSocket? _publisher;
     private string? _publisherAddress;
 
-    public Publisher(NetMQPoller poller, IConfiguration configuration, ILogger<Publisher> logger) : base(poller, configuration, logger)
+    public Publisher(NetMQPoller poller, IOptions<ZeroMqConfiguration> configuration, ILogger<Publisher> logger) : base(poller, configuration, logger)
     {
     }
 
     public void Configure()
     {
-        _publisherAddress = Configuration.GetValue<string>("PublisherAddress");
+        _publisherAddress = Configuration.Value.PublisherAddress;
         ArgumentException.ThrowIfNullOrEmpty(_publisherAddress);
 
         _publisher = new PublisherSocket();

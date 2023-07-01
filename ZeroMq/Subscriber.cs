@@ -1,6 +1,6 @@
 ﻿using Events;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 
@@ -12,13 +12,13 @@ public class Subscriber : Socket
     private readonly TimeSpan _afterConnectSleepDuration = TimeSpan.FromMilliseconds(200);
     private SubscriberSocket? _subscriber;
 
-    public Subscriber(NetMQPoller poller, IConfiguration configuration, ILogger<Subscriber> logger) : base(poller, configuration, logger)
+    public Subscriber(NetMQPoller poller, IOptions<ZeroMqConfiguration> configuration, ILogger<Subscriber> logger) : base(poller, configuration, logger)
     {
     }
 
     public void Configure()
     {
-        var subscriberAddress = Configuration.GetValue<string>("SubscriberAddress");
+        var subscriberAddress = Configuration.Value.SubscriberAddress;
         ArgumentException.ThrowIfNullOrEmpty(subscriberAddress, nameof(subscriberAddress));
 
         _subscriber = new SubscriberSocket();

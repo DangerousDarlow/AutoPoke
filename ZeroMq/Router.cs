@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Events;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 
@@ -12,13 +12,13 @@ public class Router : Socket
     private RouterSocket? _router;
     private string? _routerAddress;
 
-    public Router(NetMQPoller poller, IConfiguration configuration, ILogger<Router> logger) : base(poller, configuration, logger)
+    public Router(NetMQPoller poller, IOptions<ZeroMqConfiguration> configuration, ILogger<Router> logger) : base(poller, configuration, logger)
     {
     }
 
     public void Configure()
     {
-        _routerAddress = Configuration.GetValue<string>("RouterAddress");
+        _routerAddress = Configuration.Value.RouterAddress;
         ArgumentException.ThrowIfNullOrEmpty(_routerAddress);
 
         _router = new RouterSocket();

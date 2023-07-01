@@ -16,8 +16,9 @@ Log.Logger = new LoggerConfiguration()
 using var host = Host.CreateDefaultBuilder(args)
     .UseSerilog()
     .ConfigureAppConfiguration(builder => builder.AddJsonFile("appsettings.json"))
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
+        services.Configure<ZeroMqConfiguration>(context.Configuration.GetSection("ZeroMq"));
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
         services.AddSingleton<Publisher>();

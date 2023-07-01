@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Events;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
 
@@ -11,7 +11,7 @@ public class Dealer : Socket
 {
     private DealerSocket? _dealer;
 
-    public Dealer(NetMQPoller poller, IConfiguration configuration, ILogger<Dealer> logger) : base(poller, configuration, logger)
+    public Dealer(NetMQPoller poller, IOptions<ZeroMqConfiguration> configuration, ILogger<Dealer> logger) : base(poller, configuration, logger)
     {
     }
 
@@ -19,7 +19,7 @@ public class Dealer : Socket
     {
         ArgumentNullException.ThrowIfNull(playerId);
 
-        var dealerAddress = Configuration.GetValue<string>("DealerAddress");
+        var dealerAddress = Configuration.Value.DealerAddress;
         ArgumentException.ThrowIfNullOrEmpty(dealerAddress, nameof(dealerAddress));
 
         _dealer = new DealerSocket();

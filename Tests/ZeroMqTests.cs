@@ -1,6 +1,6 @@
 ﻿using Events;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NetMQ;
 using ZeroMq;
@@ -36,35 +36,32 @@ public class ZeroMqTests
 
         var dealerLogger = new Mock<ILogger<Dealer>>();
 
-        var client1Configuration = CreateClientConfiguration("Client2");
+        var client1Configuration = CreateClientConfiguration();
         var client1Dealer = new Dealer(_poller, client1Configuration, dealerLogger.Object);
         var client1Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
         _client1 = new Client(client1Dealer, client1Subscriber);
         _client1.Configure();
 
-        var client2Configuration = CreateClientConfiguration("Client2");
+        var client2Configuration = CreateClientConfiguration();
         var client2Dealer = new Dealer(_poller, client2Configuration, dealerLogger.Object);
         var client2Subscriber = new Subscriber(_poller, client1Configuration, subscriberLogger.Object);
         _client2 = new Client(client2Dealer, client2Subscriber);
         _client2.Configure();
     }
 
-    private static IConfiguration CreateServerConfiguration() => new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string?>
+    private static IOptions<ZeroMqConfiguration> CreateServerConfiguration() => new OptionsWrapper<ZeroMqConfiguration>(
+        new ZeroMqConfiguration
         {
-            {"RouterAddress", "tcp://*:5555"},
-            {"PublisherAddress", "tcp://*:5556"}
-        })
-        .Build();
+            RouterAddress = "tcp://*:5555",
+            PublisherAddress = "tcp://*:5556"
+        });
 
-    private static IConfiguration CreateClientConfiguration(string clientName) => new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string?>
+    private static IOptions<ZeroMqConfiguration> CreateClientConfiguration() => new OptionsWrapper<ZeroMqConfiguration>(
+        new ZeroMqConfiguration
         {
-            {"DealerAddress", "tcp://localhost:5555"},
-            {"SubscriberAddress", "tcp://localhost:5556"},
-            {"ClientName", clientName}
-        })
-        .Build();
+            DealerAddress = "tcp://localhost:5555",
+            SubscriberAddress = "tcp://localhost:5556"
+        });
 
     [TearDown]
     public void TearDown()
