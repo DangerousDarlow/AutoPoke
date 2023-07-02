@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
@@ -27,14 +28,14 @@ using var host = Host.CreateDefaultBuilder(args)
             client.Configure();
             return client;
         });
-        services.AddSingleton<Client.Player>(provider => new Client.Player("Player 1", provider.GetRequiredService<IClient>()));
+        services.AddSingleton<Player>(provider => new Player("Player 1", provider.GetRequiredService<IClient>()));
     })
     .Build();
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();
 
-var player = host.Services.GetService<Client.Player>();
+var player = host.Services.GetService<Player>();
 player?.Join();
 
 await host.RunAsync();

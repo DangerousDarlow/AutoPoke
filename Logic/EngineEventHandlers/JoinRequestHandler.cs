@@ -21,8 +21,17 @@ public class JoinRequestHandler : IEngineEventHandler
     public void HandleEvent(IEvent @event)
     {
         var joinRequest = (JoinRequest) @event;
-        var joinResponse = new JoinResponse {Status = JoinResponseStatus.Success};
-        Engine.SendToSingleClient(Envelope.CreateFromEvent(joinResponse), joinRequest.PlayerId);
+
+        if (Engine.Players.Count >= Engine.Configuration.MaxPlayers)
+        {
+            Engine.SendToSingleClient(Envelope.CreateFromEvent(new JoinResponse {Status = JoinResponseStatus.FailureEngineFull}), joinRequest.PlayerId);
+            _logger.LogInformation("Player '{PlayerName}' tried to join, but engine is full", joinRequest.PlayerName);
+            return;
+        }
+
+        Engine.AddPlayer(new Player {Id = joinRequest.PlayerId, Name = joinRequest.PlayerName});
+
+        Engine.SendToSingleClient(Envelope.CreateFromEvent(new JoinResponse {Status = JoinResponseStatus.Success}), joinRequest.PlayerId);
         _logger.LogInformation("Player '{PlayerName}' joined", joinRequest.PlayerName);
     }
 }

@@ -10,5 +10,5 @@ public record JoinRequest : IEvent
     /// <summary>
     /// Human readable name for the player. Used only to make output human readable.
     /// </summary>
-    public string? PlayerName { get; init; }
+    public string PlayerName { get; init; } = null!;
 }

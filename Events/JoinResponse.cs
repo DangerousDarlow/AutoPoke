@@ -10,5 +10,6 @@ public record JoinResponse : IEvent
 
 public enum JoinResponseStatus
 {
-    Success
+    Success,
+    FailureEngineFull
 }

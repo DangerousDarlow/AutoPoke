@@ -19,6 +19,7 @@ using var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.Configure<ZeroMqConfiguration>(context.Configuration.GetSection("ZeroMq"));
+        services.Configure<EngineConfiguration>(context.Configuration.GetSection("Engine"));
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
         services.AddSingleton<Publisher>();

@@ -9,7 +9,7 @@ public class EngineTests
 {
     private IEngine _engine = null!;
     private MockZeroMq _mockZeroMq = null!;
-    private Player _player = null!;
+    private Dictionary<Guid, Player> _players = null!;
 
     private MockSocket Server => _mockZeroMq.GetServer();
 
@@ -35,9 +35,25 @@ public class EngineTests
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
         _mockZeroMq = serviceProvider.GetService<MockZeroMq>()!;
-        var playerId = _mockZeroMq.CreateClient().Id;
-        _player = new Player {Id = playerId, Name = "Player 1"};
         _engine = serviceProvider.GetService<IEngine>()!;
+        _players = new Dictionary<Guid, Player>();
+    }
+
+    private Player CreatePlayer(string name)
+    {
+        var playerId = _mockZeroMq.CreateClient().Id;
+        var player = new Player {Id = playerId, Name = name};
+        _players.Add(player.Id, player);
+        return player;
+    }
+
+    private void CreateAndJoinMaximumPlayers()
+    {
+        for (var i = 0; i < _engine.Configuration.MaxPlayers; i++)
+        {
+            var player = CreatePlayer($"Player {i}");
+            Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
+        }
     }
 
     [Test]
@@ -45,14 +61,32 @@ public class EngineTests
     {
         // Given engine is not full
         // When engine receives JoinRequest
-        // Then engine responses with JoinResponse with success status
+        // Then engine responds with JoinResponse with success status
 
-        var joinRequest = new JoinRequest {PlayerId = _player.Id, PlayerName = _player.Name};
-        Server.Handle(Envelope.CreateFromEvent(joinRequest));
+        var player = CreatePlayer("Player");
+        Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
 
         Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(1), "Server has not sent response");
         var joinResponse = Server.SentToSingleClient[0].ExtractEvent() as JoinResponse;
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.Success));
+    }
+
+    [Test]
+    public void JoinRequest_is_unsuccessful_if_engine_is_full()
+    {
+        // Given engine is full
+        // When engine receives JoinRequest
+        // Then engine responds with JoinResponse with failure status
+
+        CreateAndJoinMaximumPlayers();
+
+        var player = CreatePlayer("Player");
+        Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
+
+        Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(_engine.Configuration.MaxPlayers + 1), "Server has not sent response");
+        var joinResponse = Server.SentToSingleClient.Last().ExtractEvent() as JoinResponse;
+        Assert.That(joinResponse, Is.Not.Null);
+        Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.FailureEngineFull));
     }
 }
