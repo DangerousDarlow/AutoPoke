@@ -10,7 +10,7 @@ public interface IEngine
 {
     EngineConfiguration Configuration { get; }
     ImmutableDictionary<Guid, Player> Players { get; }
-    void SendToSingleClient(Envelope envelope, Guid playerId);
+    void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
     void AddPlayer(Player player);
 }
 
@@ -39,7 +39,11 @@ public class Engine : IEngine
 
     public void AddPlayer(Player player) => _players.Add(player.Id, player);
 
-    public void SendToSingleClient(Envelope envelope, Guid playerId) => _server.SendToSingleClient(envelope, playerId);
+    public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        _server.SendToSingleClient(envelope, playerId);
+    }
 
     private void HandleEvent(Envelope envelope)
     {

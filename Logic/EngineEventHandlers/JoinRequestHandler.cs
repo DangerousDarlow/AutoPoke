@@ -24,14 +24,14 @@ public class JoinRequestHandler : IEngineEventHandler
 
         if (Engine.Players.Count >= Engine.Configuration.MaxPlayers)
         {
-            Engine.SendToSingleClient(Envelope.CreateFromEvent(new JoinResponse {Status = JoinResponseStatus.FailureEngineFull}), joinRequest.PlayerId);
+            Engine.SendToSingleClient(new JoinResponse {Status = JoinResponseStatus.FailureEngineFull}, joinRequest.PlayerId);
             _logger.LogInformation("Player '{PlayerName}' tried to join, but engine is full", joinRequest.PlayerName);
             return;
         }
 
         Engine.AddPlayer(new Player {Id = joinRequest.PlayerId, Name = joinRequest.PlayerName});
 
-        Engine.SendToSingleClient(Envelope.CreateFromEvent(new JoinResponse {Status = JoinResponseStatus.Success}), joinRequest.PlayerId);
+        Engine.SendToSingleClient(new JoinResponse {Status = JoinResponseStatus.Success}, joinRequest.PlayerId);
         _logger.LogInformation("Player '{PlayerName}' joined", joinRequest.PlayerName);
     }
 }
