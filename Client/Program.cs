@@ -15,10 +15,11 @@ Log.Logger = new LoggerConfiguration()
 
 using var host = Host.CreateDefaultBuilder(args)
     .UseSerilog()
-    .ConfigureAppConfiguration(builder => builder.AddJsonFile("appsettings.json"))
+    .ConfigureAppConfiguration(builder => builder.AddJsonFile(args.Length > 0 ? args[0] : "appsettings.json"))
     .ConfigureServices((context, services) =>
     {
         services.Configure<ZeroMqConfiguration>(context.Configuration.GetSection("ZeroMq"));
+        services.Configure<PlayerConfiguration>(context.Configuration.GetSection("Player"));
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Dealer>();
         services.AddSingleton<Subscriber>();
@@ -28,14 +29,15 @@ using var host = Host.CreateDefaultBuilder(args)
             client.Configure();
             return client;
         });
-        services.AddSingleton<Player>(provider => new Player("Player 1", provider.GetRequiredService<IClient>()));
+        services.AddSingleton<IPlayer, Player>();
+        services.AddAllImplementationsInNamespace<IPlayerEventHandler>("Client.ClientEventHandlers");
     })
     .Build();
 
 var poller = host.Services.GetService<NetMQPoller>();
 poller?.RunAsync();
 
-var player = host.Services.GetService<Player>();
+var player = host.Services.GetService<IPlayer>();
 player?.Join();
 
 await host.RunAsync();

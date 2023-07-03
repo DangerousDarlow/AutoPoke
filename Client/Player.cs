@@ -1,23 +1,56 @@
 ﻿using Events;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ZeroMq;
 
 namespace Client;
 
-public class Player
+public interface IPlayer
+{
+    PlayerConfiguration Configuration { get; }
+    void Join();
+    void Send<T>(T @event) where T : IEvent;
+}
+
+public class Player : IPlayer
 {
     private readonly IClient _client;
+    private readonly Dictionary<Type, IPlayerEventHandler> _eventHandlers;
+    private readonly ILogger<Player> _logger;
 
-    public Player(string name, IClient client)
+    public Player(IClient client, IEnumerable<IPlayerEventHandler> eventHandlers, IOptions<PlayerConfiguration> configuration, ILogger<Player> logger)
     {
-        Name = name;
         _client = client;
+        _logger = logger;
+        _client.ReceivedEvent += HandleEvent;
+
+        _eventHandlers = eventHandlers.ToDictionary(x => x.TypeHandled);
+        foreach (var handler in _eventHandlers.Values) handler.Player = this;
+
+        Configuration = configuration.Value;
     }
 
-    private Guid Id => _client.Id;
+    public PlayerConfiguration Configuration { get; }
 
-    private string Name { get; }
+    public void Join() => Send(new JoinRequest {PlayerId = _client.Id, PlayerName = Configuration.Name});
 
-    public void Join() => Send(Envelope.CreateFromEvent(new JoinRequest {PlayerId = Id, PlayerName = Name}));
+    public void Send<T>(T @event) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        _client.SendToServer(envelope);
+    }
 
-    private void Send(Envelope envelope) => _client.SendToServer(envelope);
+    private void HandleEvent(Envelope envelope)
+    {
+        var @event = envelope.ExtractEvent();
+        if (_eventHandlers.TryGetValue(@event.GetType(), out var handler))
+        {
+            handler.HandleEvent(@event);
+        }
+        else
+        {
+            _logger.LogError("No handler for event type {EventType}", @event.GetType().Name);
+            throw new Exception($"No handler for event type '{@event.GetType().Name}'");
+        }
+    }
 }
