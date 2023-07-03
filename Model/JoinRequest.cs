@@ -3,7 +3,7 @@
 /// <summary>
 /// Sent by a client to the server when requesting to join a session
 /// </summary>
-public record JoinRequest : IEvent
+public record JoinRequest : Event
 {
     public Guid PlayerId { get; init; }
 

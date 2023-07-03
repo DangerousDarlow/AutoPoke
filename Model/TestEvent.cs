@@ -1,6 +1,6 @@
 ﻿namespace Model;
 
-public record TestEvent : IEvent
+public record TestEvent : Event
 {
     public string? Value { get; init; }
 }
