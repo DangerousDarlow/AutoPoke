@@ -1,4 +1,4 @@
-﻿namespace Events;
+﻿namespace Model;
 
 public enum Suit
 {

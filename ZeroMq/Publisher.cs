@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Events;
+using Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;

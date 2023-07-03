@@ -1,4 +1,4 @@
-﻿using Events;
+﻿using Model;
 using Logic;
 using Microsoft.Extensions.DependencyInjection;
 using ZeroMq;

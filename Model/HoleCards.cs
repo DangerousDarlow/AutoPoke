@@ -1,4 +1,4 @@
-﻿namespace Events;
+﻿namespace Model;
 
 /// <summary>
 ///     Player hole cards (not seen by other players). Sent by the engine directly to a player.

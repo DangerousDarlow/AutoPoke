@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Events;
+using Model;
 
 namespace Tests;
 

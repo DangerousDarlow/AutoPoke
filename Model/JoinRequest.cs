@@ -1,4 +1,4 @@
-﻿namespace Events;
+﻿namespace Model;
 
 /// <summary>
 /// Sent by a client to the server when requesting to join a session

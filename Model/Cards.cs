@@ -1,6 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Global
 
-namespace Events;
+namespace Model;
 
 public static class Cards
 {

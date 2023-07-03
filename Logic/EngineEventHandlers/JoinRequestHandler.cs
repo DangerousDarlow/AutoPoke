@@ -1,4 +1,4 @@
-﻿using Events;
+﻿using Model;
 using Microsoft.Extensions.Logging;
 
 namespace Logic.EngineEventHandlers;

@@ -1,4 +1,4 @@
-﻿using Events;
+﻿using Model;
 
 namespace ZeroMq;
 
