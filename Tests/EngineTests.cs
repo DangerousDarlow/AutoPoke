@@ -52,7 +52,7 @@ public class EngineTests
         for (var i = 0; i < _engine.Configuration.MaxPlayers; i++)
         {
             var player = CreatePlayer($"Player {i}");
-            Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
+            Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
         }
     }
 
@@ -64,10 +64,10 @@ public class EngineTests
         // Then engine responds to client with JoinResponse with success status
 
         var player = CreatePlayer("Player");
-        Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
+        Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
 
         Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(1), "Server has not sent response");
-        var joinResponse = Server.SentToSingleClient[0].ExtractEvent() as JoinResponse;
+        var joinResponse = Server.SentToSingleClient[0] as JoinResponse;
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.Success));
     }
@@ -82,10 +82,10 @@ public class EngineTests
         CreateAndJoinMaximumPlayers();
 
         var player = CreatePlayer("Player");
-        Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
+        Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
 
         Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(_engine.Configuration.MaxPlayers + 1), "Server has not sent response");
-        var joinResponse = Server.SentToSingleClient.Last().ExtractEvent() as JoinResponse;
+        var joinResponse = Server.SentToSingleClient.Last() as JoinResponse;
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.FailureEngineFull));
     }
@@ -96,10 +96,10 @@ public class EngineTests
         // When engine receives BeginSession
         // Then engine responds to all clients with SessionStarted
 
-        Server.Handle(Envelope.CreateFromEvent(new BeginSession {Games = 1}));
+        Server.Handle(new BeginSession {Games = 1});
         
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Server has not sent response");
-        var sessionStarted = Server.SentToAllClients[0].ExtractEvent() as SessionStarted;
+        var sessionStarted = Server.SentToAllClients[0] as SessionStarted;
         Assert.That(sessionStarted, Is.Not.Null);
         Assert.That(sessionStarted!.Session.Games, Is.EqualTo(1));
     }

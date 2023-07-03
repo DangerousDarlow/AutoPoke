@@ -12,13 +12,13 @@ public class MockSocket : IClient, IServer
         _mockZeroMq = mockZeroMq;
     }
 
-    public IList<Envelope> Received { get; } = new List<Envelope>();
+    public IList<IEvent> Received { get; } = new List<IEvent>();
 
-    public IList<Envelope> SentToAllClients { get; } = new List<Envelope>();
+    public IList<IEvent> SentToAllClients { get; } = new List<IEvent>();
 
-    public IList<Envelope> SentToSingleClient { get; } = new List<Envelope>();
+    public IList<IEvent> SentToSingleClient { get; } = new List<IEvent>();
 
-    public IList<Envelope> SentToServer { get; } = new List<Envelope>();
+    public IList<IEvent> SentToServer { get; } = new List<IEvent>();
 
     public Guid Id { get; } = Guid.NewGuid();
 
@@ -27,28 +27,34 @@ public class MockSocket : IClient, IServer
     public void SendToServer(Envelope envelope)
     {
         envelope.Origin = Id;
-        SentToServer.Add(envelope);
+        SentToServer.Add(envelope.ExtractEvent());
         _mockZeroMq.SendToServer(envelope);
     }
 
     public void SendToSingleClient(Envelope envelope, Guid client)
     {
         envelope.Origin = Id;
-        SentToSingleClient.Add(envelope);
+        SentToSingleClient.Add(envelope.ExtractEvent());
         _mockZeroMq.SendToSingleClient(envelope, client);
     }
 
     public void SendToAllClients(Envelope envelope)
     {
         envelope.Origin = Id;
-        SentToAllClients.Add(envelope);
+        SentToAllClients.Add(envelope.ExtractEvent());
         _mockZeroMq.SendToAllClients(envelope);
     }
 
     public void Handle(Envelope envelope)
     {
-        Received.Add(envelope);
+        Received.Add(envelope.ExtractEvent());
         ReceivedEvent?.Invoke(envelope);
+    }
+    
+    public void Handle<T>(T @event) where T : IEvent
+    {
+        Received.Add(@event);
+        ReceivedEvent?.Invoke(Envelope.CreateFromEvent(@event));
     }
 }
 
