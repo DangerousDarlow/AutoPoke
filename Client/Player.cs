@@ -8,7 +8,9 @@ namespace Client;
 public interface IPlayer
 {
     PlayerConfiguration Configuration { get; }
+
     void Join();
+
     void Send<T>(T @event) where T : IEvent;
 }
 
@@ -49,8 +51,7 @@ public class Player : IPlayer
         }
         else
         {
-            _logger.LogError("No handler for event type {EventType}", @event.GetType().Name);
-            throw new Exception($"No handler for event type '{@event.GetType().Name}'");
+            _logger.LogWarning("No handler for event type {EventType}", @event.GetType().Name);
         }
     }
 }

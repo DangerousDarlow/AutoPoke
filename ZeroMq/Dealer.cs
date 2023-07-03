@@ -15,15 +15,15 @@ public class Dealer : Socket
     {
     }
 
-    public void Configure(Guid playerId)
+    public void Configure(Guid id)
     {
-        ArgumentNullException.ThrowIfNull(playerId);
+        ArgumentNullException.ThrowIfNull(id);
 
         var dealerAddress = Configuration.Value.DealerAddress;
         ArgumentException.ThrowIfNullOrEmpty(dealerAddress, nameof(dealerAddress));
 
         _dealer = new DealerSocket();
-        _dealer.Options.Identity = playerId.ToByteArray();
+        _dealer.Options.Identity = id.ToByteArray();
         _dealer.Connect(dealerAddress);
         Logger.LogInformation("Dealer address: {DealerAddress}", dealerAddress);
 

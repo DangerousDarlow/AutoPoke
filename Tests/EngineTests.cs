@@ -57,11 +57,11 @@ public class EngineTests
     }
 
     [Test]
-    public void JoinRequest_is_successful_if_engine_is_not_full()
+    public void Player_can_join_if_not_full()
     {
         // Given engine is not full
-        // When engine receives JoinRequest
-        // Then engine responds with JoinResponse with success status
+        // When engine receives JoinRequest from client
+        // Then engine responds to client with JoinResponse with success status
 
         var player = CreatePlayer("Player");
         Server.Handle(Envelope.CreateFromEvent(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name}));
@@ -73,11 +73,11 @@ public class EngineTests
     }
 
     [Test]
-    public void JoinRequest_is_unsuccessful_if_engine_is_full()
+    public void Player_cannot_join_if_full()
     {
         // Given engine is full
-        // When engine receives JoinRequest
-        // Then engine responds with JoinResponse with failure status
+        // When engine receives JoinRequest from client
+        // Then engine responds to client with JoinResponse with failure status
 
         CreateAndJoinMaximumPlayers();
 
@@ -88,5 +88,19 @@ public class EngineTests
         var joinResponse = Server.SentToSingleClient.Last().ExtractEvent() as JoinResponse;
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.FailureEngineFull));
+    }
+
+    [Test]
+    public void Session_can_be_started()
+    {
+        // When engine receives BeginSession
+        // Then engine responds to all clients with SessionStarted
+
+        Server.Handle(Envelope.CreateFromEvent(new BeginSession {Games = 1}));
+        
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Server has not sent response");
+        var sessionStarted = Server.SentToAllClients[0].ExtractEvent() as SessionStarted;
+        Assert.That(sessionStarted, Is.Not.Null);
+        Assert.That(sessionStarted!.Session.Games, Is.EqualTo(1));
     }
 }

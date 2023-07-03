@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZeroMq", "ZeroMq\ZeroMq.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logic", "Logic\Logic.csproj", "{6438D1A8-4F49-45A7-B3C8-687F7EC61545}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{266E422E-A8D3-43A1-A862-77D4771BFB83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeginSession", "Scripts\BeginSession\BeginSession.csproj", "{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +46,12 @@ Global
 		{6438D1A8-4F49-45A7-B3C8-687F7EC61545}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6438D1A8-4F49-45A7-B3C8-687F7EC61545}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6438D1A8-4F49-45A7-B3C8-687F7EC61545}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6EFCB026-97A7-48A8-BEF4-CCF5AC76F8C1} = {266E422E-A8D3-43A1-A862-77D4771BFB83}
 	EndGlobalSection
 EndGlobal

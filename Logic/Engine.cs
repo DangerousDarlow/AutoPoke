@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
-using Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Model;
 using ZeroMq;
 
 namespace Logic;
@@ -9,8 +9,15 @@ namespace Logic;
 public interface IEngine
 {
     EngineConfiguration Configuration { get; }
+
     ImmutableDictionary<Guid, Player> Players { get; }
+
+    EngineSession? EngineSession { get; set; }
+
     void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
+
+    void SendToAllClients<T>(T @event) where T : IEvent;
+
     void AddPlayer(Player player);
 }
 
@@ -37,12 +44,20 @@ public class Engine : IEngine
 
     public ImmutableDictionary<Guid, Player> Players => _players.ToImmutableDictionary();
 
+    public EngineSession? EngineSession { get; set; }
+
     public void AddPlayer(Player player) => _players.Add(player.Id, player);
 
     public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
     {
         var envelope = Envelope.CreateFromEvent(@event);
         _server.SendToSingleClient(envelope, playerId);
+    }
+
+    public void SendToAllClients<T>(T @event) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        _server.SendToAllClients(envelope);
     }
 
     private void HandleEvent(Envelope envelope)
