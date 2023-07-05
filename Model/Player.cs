@@ -1,4 +1,4 @@
-﻿namespace Logic;
+﻿namespace Model;
 
 public record Player
 {

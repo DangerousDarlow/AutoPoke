@@ -94,13 +94,39 @@ public class EngineTests
     public void Session_can_be_started()
     {
         // When engine receives BeginSession
-        // Then engine responds to all clients with SessionStarted
+        // Then engine responds to all clients with SessionStarted and GameStarted
+
+        CreateAndJoinMaximumPlayers();
 
         Server.Handle(new BeginSession {Games = 1});
-        
-        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Server has not sent response");
+
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Server has not sent responses");
+
         var sessionStarted = Server.SentToAllClients[0] as SessionStarted;
         Assert.That(sessionStarted, Is.Not.Null);
         Assert.That(sessionStarted!.Session.Games, Is.EqualTo(1));
+
+        var gameStarted = Server.SentToAllClients[1] as GameStarted;
+        Assert.That(gameStarted, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(gameStarted!.Game.Sequence, Is.EqualTo(1));
+            Assert.That(gameStarted.Game.Players, Is.EquivalentTo(_players.Values));
+            Assert.That(gameStarted.Game.StartingStack, Is.EqualTo(_engine.Configuration.StartingStack));
+        });
+    }
+
+    [Test]
+    public void Session_cannot_be_started_if_already_started()
+    {
+        // Given a session has started
+        // When engine receives BeginSession
+        // Then engine does not respond
+
+        Server.Handle(new BeginSession {Games = 1});
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Server has not sent responses");
+
+        Server.Handle(new BeginSession {Games = 1});
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Additional responses sent");
     }
 }

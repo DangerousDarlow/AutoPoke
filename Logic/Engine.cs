@@ -14,6 +14,8 @@ public interface IEngine
 
     EngineSession? EngineSession { get; set; }
 
+    EngineGame? EngineGame { get; set; }
+    
     void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
 
     void SendToAllClients<T>(T @event) where T : IEvent;
@@ -45,6 +47,8 @@ public class Engine : IEngine
     public ImmutableDictionary<Guid, Player> Players => _players.ToImmutableDictionary();
 
     public EngineSession? EngineSession { get; set; }
+
+    public EngineGame? EngineGame { get; set; }
 
     public void AddPlayer(Player player) => _players.Add(player.Id, player);
 

@@ -5,5 +5,5 @@
 /// </summary>
 public record SessionStarted : Event
 {
-    public Session Session { get; init; } = new();
+    public Session Session { get; init; } = null!;
 }

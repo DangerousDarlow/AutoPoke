@@ -22,6 +22,7 @@ public class EnvelopeTests
 
         var eventOut = envelopeOut.ExtractEvent() as TestEvent;
         Assert.That(eventOut, Is.Not.Null);
+        Assert.That(eventOut!.Id, Is.EqualTo(eventIn.Id));
         Assert.That(eventOut!.EventId, Is.EqualTo(eventIn.EventId));
         Assert.That(eventOut.Value, Is.EqualTo(eventIn.Value));
     }
