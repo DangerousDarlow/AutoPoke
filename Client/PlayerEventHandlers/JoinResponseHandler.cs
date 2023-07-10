@@ -1,7 +1,7 @@
-﻿using Model;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Model;
 
-namespace Client.ClientEventHandlers;
+namespace Client.PlayerEventHandlers;
 
 // Class is used via reflection
 // ReSharper disable once UnusedType.Global
