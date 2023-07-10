@@ -18,6 +18,8 @@ public class JoinRequestHandler : IEngineEventHandler
 
     public Type TypeHandled => typeof(JoinRequest);
 
+    public OriginFilter OriginFilter => OriginFilter.Any;
+
     public void HandleEvent(IEvent @event)
     {
         var joinRequest = (JoinRequest) @event;

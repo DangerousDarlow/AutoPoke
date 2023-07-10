@@ -8,5 +8,13 @@ public interface IEngineEventHandler
 
     Type TypeHandled { get; }
 
+    OriginFilter OriginFilter { get; }
+    
     void HandleEvent(IEvent @event);
+}
+
+public enum OriginFilter
+{
+    Any,
+    EngineOnly
 }

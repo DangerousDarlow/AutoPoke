@@ -15,10 +15,12 @@ public interface IEngine
     EngineSession? EngineSession { get; set; }
 
     EngineGame? EngineGame { get; set; }
-    
+
     void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
 
     void SendToAllClients<T>(T @event) where T : IEvent;
+
+    void SendToSelf<T>(T @event) where T : IEvent;
 
     void AddPlayer(Player player);
 }
@@ -64,11 +66,28 @@ public class Engine : IEngine
         _server.SendToAllClients(envelope);
     }
 
+    public void SendToSelf<T>(T @event) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        envelope.Origin = _server.Id;
+        HandleEvent(envelope);
+    }
+
     private void HandleEvent(Envelope envelope)
     {
         var @event = envelope.ExtractEvent();
         if (_eventHandlers.TryGetValue(@event.GetType(), out var handler))
         {
+            if (handler.OriginFilter == OriginFilter.EngineOnly && envelope.Origin != _server.Id)
+            {
+                _players.TryGetValue(envelope.Origin, out var player);
+                _logger.LogError(
+                    "Event type {EventType} origin is player ({PlayerId} {PlayerName}) but must be engine",
+                    @event.GetType().Name, envelope.Origin, player?.Name ?? "Unknown");
+
+                return;
+            }
+
             handler.HandleEvent(@event);
         }
         else

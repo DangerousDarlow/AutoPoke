@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Model;
+﻿using Model;
 using Microsoft.Extensions.Logging;
 
 namespace Logic.EngineEventHandlers;
@@ -19,6 +18,8 @@ public class BeginSessionHandler : IEngineEventHandler
 
     public Type TypeHandled => typeof(BeginSession);
 
+    public OriginFilter OriginFilter => OriginFilter.Any;
+
     public void HandleEvent(IEvent @event)
     {
         var beginSession = (BeginSession) @event;
@@ -37,17 +38,6 @@ public class BeginSessionHandler : IEngineEventHandler
         Engine.SendToAllClients(new SessionStarted {Session = Engine.EngineSession.Session});
         _logger.LogInformation("Session '{SessionId}' started: {Games} games", Engine.EngineSession.Session.SessionId, Engine.EngineSession.Session.Games);
 
-        Engine.EngineGame = new EngineGame
-        {
-            Game = new Game
-            {
-                Sequence = 1,
-                Players = Engine.Players.Values.ToImmutableList(),
-                StartingStack = Engine.Configuration.StartingStack
-            }
-        };
-
-        Engine.SendToAllClients(new GameStarted {Game = Engine.EngineGame.Game});
-        _logger.LogDebug("Game '{GameId}' started", Engine.EngineGame.Game.Id);
+        Engine.SendToSelf(new BeginGame());
     }
 }
