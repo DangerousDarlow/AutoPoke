@@ -1,6 +1,6 @@
 #set ($HANDLER = "${Event}Handler")
-using Model;
 using Microsoft.Extensions.Logging;
+using Model;
 
 namespace Client.PlayerEventHandlers;
 

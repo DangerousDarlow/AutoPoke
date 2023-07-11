@@ -1,6 +1,6 @@
 #set ($HANDLER = "${Event}Handler")
-using Model;
 using Microsoft.Extensions.Logging;
+using Model;
 
 namespace Logic.EngineEventHandlers;
 
@@ -18,6 +18,8 @@ public class $HANDLER : IEngineEventHandler
     public IEngine Engine { get; set; } = null!;
 
     public Type TypeHandled => typeof($Event);
+
+    public OriginFilter OriginFilter => OriginFilter.Any;
 
     public void HandleEvent(IEvent @event)
     {
