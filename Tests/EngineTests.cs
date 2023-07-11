@@ -1,6 +1,6 @@
-﻿using Model;
-using Logic;
+﻿using Logic;
 using Microsoft.Extensions.DependencyInjection;
+using Model;
 using ZeroMq;
 
 namespace Tests;

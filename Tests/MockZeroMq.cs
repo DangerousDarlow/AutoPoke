@@ -50,7 +50,7 @@ public class MockSocket : IClient, IServer
         Received.Add(envelope.ExtractEvent());
         ReceivedEvent?.Invoke(envelope);
     }
-    
+
     public void Handle<T>(T @event) where T : IEvent
     {
         Received.Add(@event);

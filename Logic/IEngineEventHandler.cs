@@ -9,7 +9,7 @@ public interface IEngineEventHandler
     Type TypeHandled { get; }
 
     OriginFilter OriginFilter { get; }
-    
+
     void HandleEvent(IEvent @event);
 }
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
-using Model;
 using Microsoft.Extensions.Logging;
+using Model;
 
 namespace Logic.EngineEventHandlers;
 

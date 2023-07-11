@@ -1,6 +1,6 @@
-﻿using Model;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Model;
 using ZeroMq;
 
 namespace Client;
@@ -9,7 +9,7 @@ public interface IPlayer
 {
     PlayerConfiguration Configuration { get; }
 
-    Game CurrentGame { get; set; }
+    Game? CurrentGame { get; set; }
 
     void Join();
 
@@ -36,7 +36,7 @@ public class Player : IPlayer
 
     public PlayerConfiguration Configuration { get; }
 
-    public Game CurrentGame { get; set; }
+    public Game? CurrentGame { get; set; }
 
     public void Join() => Send(new JoinRequest {PlayerId = _client.Id, PlayerName = Configuration.Name});
 

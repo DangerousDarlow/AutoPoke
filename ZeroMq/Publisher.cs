@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Model;
 using NetMQ;
 using NetMQ.Sockets;
 

@@ -1,5 +1,5 @@
-﻿using Model;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Model;
 
 namespace Logic.EngineEventHandlers;
 

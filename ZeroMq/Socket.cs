@@ -1,6 +1,6 @@
-﻿using Model;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Model;
 using NetMQ;
 
 namespace ZeroMq;
