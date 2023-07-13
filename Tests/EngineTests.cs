@@ -189,13 +189,19 @@ public class EngineTests
 
         Assert.Multiple(() =>
         {
+            var allHoleCards = new HashSet<Card>();
+
             foreach (var player in _players.Values)
             {
                 var playerEvents = Server.SentToSingleClient.Where(tuple => tuple.Item2 == player.Id).ToList();
                 Assert.That(playerEvents, Has.Count.EqualTo(2));
                 var holeCards = playerEvents[1].Item1 as HoleCards;
                 Assert.That(holeCards, Is.Not.Null, $"Player {player.Name} has not received HoleCards");
+                allHoleCards.Add(holeCards!.Card1);
+                allHoleCards.Add(holeCards!.Card2);
             }
+
+            Assert.That(allHoleCards, Has.Count.EqualTo(_players.Count * 2), "HoleCards are not all unique");
         });
 
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Engine has not sent responses");
