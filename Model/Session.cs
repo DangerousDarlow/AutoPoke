@@ -2,7 +2,7 @@
 
 public record Session
 {
-    public Guid SessionId { get; init; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
 
     public int Games { get; init; }
 }

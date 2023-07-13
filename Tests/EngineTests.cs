@@ -69,7 +69,9 @@ public class EngineTests
         Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
 
         Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(1), "Engine has not sent response");
-        var joinResponse = Server.SentToSingleClient[0] as JoinResponse;
+        var (@event, client) = Server.SentToSingleClient[0];
+        var joinResponse = @event as JoinResponse;
+        Assert.That(client, Is.EqualTo(player.Id));
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.Success));
     }
@@ -86,8 +88,10 @@ public class EngineTests
         var player = CreatePlayer("Player");
         Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
 
-        Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(_engine.Configuration.MaxPlayers + 1), "Engine has not sent response");
-        var joinResponse = Server.SentToSingleClient.Last() as JoinResponse;
+        Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(_players.Count));
+        var (@event, client) = Server.SentToSingleClient.Last();
+        var joinResponse = @event as JoinResponse;
+        Assert.That(client, Is.EqualTo(player.Id));
         Assert.That(joinResponse, Is.Not.Null);
         Assert.That(joinResponse!.Status, Is.EqualTo(JoinResponseStatus.FailureEngineFull));
     }
@@ -102,7 +106,7 @@ public class EngineTests
 
         Server.Handle(new BeginSession {Games = 1});
 
-        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Engine has not sent responses");
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(3), "Engine has not sent responses");
 
         var sessionStarted = Server.SentToAllClients[0] as SessionStarted;
         Assert.That(sessionStarted, Is.Not.Null);
@@ -110,12 +114,9 @@ public class EngineTests
 
         var gameStarted = Server.SentToAllClients[1] as GameStarted;
         Assert.That(gameStarted, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(gameStarted!.Game.Sequence, Is.EqualTo(1));
-            Assert.That(gameStarted.Game.Players, Is.EquivalentTo(_players.Values));
-            Assert.That(gameStarted.Game.StartingStack, Is.EqualTo(_engine.Configuration.StartingStack));
-        });
+
+        var handStarted = Server.SentToAllClients[2] as HandStarted;
+        Assert.That(handStarted, Is.Not.Null);
     }
 
     [Test]
@@ -126,10 +127,10 @@ public class EngineTests
         // Then engine does not respond
 
         Server.Handle(new BeginSession {Games = 1});
-        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Engine has not sent responses");
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(3), "Engine has not sent responses");
 
         Server.Handle(new BeginSession {Games = 1});
-        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Additional responses sent");
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(3), "Additional responses sent");
     }
 
     [Test]
@@ -144,7 +145,7 @@ public class EngineTests
         envelope.Origin = _server.Id;
         Server.Handle(envelope);
 
-        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Engine has not sent responses");
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Engine has not sent responses");
 
         var gameStarted = Server.SentToAllClients[0] as GameStarted;
         Assert.That(gameStarted, Is.Not.Null);
@@ -154,6 +155,9 @@ public class EngineTests
             Assert.That(gameStarted.Game.Players, Is.EquivalentTo(_players.Values));
             Assert.That(gameStarted.Game.StartingStack, Is.EqualTo(_engine.Configuration.StartingStack));
         });
+
+        var handStarted = Server.SentToAllClients[1] as HandStarted;
+        Assert.That(handStarted, Is.Not.Null);
     }
 
     [Test]
@@ -164,5 +168,48 @@ public class EngineTests
 
         Server.Handle(new BeginGame());
         Assert.That(Server.SentToAllClients, Is.Empty, "Engine has not ignored BeginGame");
+    }
+
+    [Test]
+    public void Hand_can_be_started()
+    {
+        // When engine receives BeginHand and origin is engine
+        // Then engine responds to each client with HoleCards
+        // And engine responds to all clients with HandStarted
+
+        CreateAndJoinMaximumPlayers();
+
+        var envelope = Envelope.CreateFromEvent(new BeginHand());
+        envelope.Origin = _server.Id;
+        Server.Handle(envelope);
+
+        // JoinResponse & HoleCards for each player
+        var expectedNumberOfEventsSendToSingleClients = _players.Count * 2;
+        Assert.That(Server.SentToSingleClient, Has.Count.EqualTo(expectedNumberOfEventsSendToSingleClients));
+
+        Assert.Multiple(() =>
+        {
+            foreach (var player in _players.Values)
+            {
+                var playerEvents = Server.SentToSingleClient.Where(tuple => tuple.Item2 == player.Id).ToList();
+                Assert.That(playerEvents, Has.Count.EqualTo(2));
+                var holeCards = playerEvents[1].Item1 as HoleCards;
+                Assert.That(holeCards, Is.Not.Null, $"Player {player.Name} has not received HoleCards");
+            }
+        });
+
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Engine has not sent responses");
+        var handStarted = Server.SentToAllClients[0] as HandStarted;
+        Assert.That(handStarted, Is.Not.Null);
+    }
+
+    [Test]
+    public void BeginHand_is_ignored_if_origin_is_not_engine()
+    {
+        // When engine receives BeginHand and origin is not engine
+        // Then BeginHand is ignored
+
+        Server.Handle(new BeginHand());
+        Assert.That(Server.SentToAllClients, Is.Empty, "Engine has not ignored BeginHand");
     }
 }

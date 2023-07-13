@@ -11,6 +11,8 @@ public interface IPlayer
 
     Game? CurrentGame { get; set; }
 
+    HoleCards? HoleCards { get; set; }
+
     void Join();
 
     void Send<T>(T @event) where T : IEvent;
@@ -37,6 +39,8 @@ public class Player : IPlayer
     public PlayerConfiguration Configuration { get; }
 
     public Game? CurrentGame { get; set; }
+
+    public HoleCards? HoleCards { get; set; }
 
     public void Join() => Send(new JoinRequest {PlayerId = _client.Id, PlayerName = Configuration.Name});
 

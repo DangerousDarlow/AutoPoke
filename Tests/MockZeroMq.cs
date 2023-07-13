@@ -16,7 +16,7 @@ public class MockSocket : IClient, IServer
 
     public IList<IEvent> SentToAllClients { get; } = new List<IEvent>();
 
-    public IList<IEvent> SentToSingleClient { get; } = new List<IEvent>();
+    public IList<Tuple<IEvent, Guid>> SentToSingleClient { get; } = new List<Tuple<IEvent, Guid>>();
 
     public IList<IEvent> SentToServer { get; } = new List<IEvent>();
 
@@ -34,7 +34,7 @@ public class MockSocket : IClient, IServer
     public void SendToSingleClient(Envelope envelope, Guid client)
     {
         envelope.Origin = Id;
-        SentToSingleClient.Add(envelope.ExtractEvent());
+        SentToSingleClient.Add(new Tuple<IEvent, Guid>(envelope.ExtractEvent(), client));
         _mockZeroMq.SendToSingleClient(envelope, client);
     }
 

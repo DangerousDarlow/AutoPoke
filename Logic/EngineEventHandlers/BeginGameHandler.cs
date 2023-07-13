@@ -37,5 +37,7 @@ public class BeginGameHandler : IEngineEventHandler
 
         Engine.SendToAllClients(new GameStarted {Game = Engine.EngineGame.Game});
         _logger.LogDebug("Game '{GameId}' started", Engine.EngineGame.Game.Id);
+
+        Engine.SendToSelf(new BeginHand());
     }
 }

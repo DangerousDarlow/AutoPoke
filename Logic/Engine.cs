@@ -16,6 +16,8 @@ public interface IEngine
 
     EngineGame? EngineGame { get; set; }
 
+    Deck Deck { get; }
+
     void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
 
     void SendToAllClients<T>(T @event) where T : IEvent;
@@ -52,6 +54,8 @@ public class Engine : IEngine
 
     public EngineGame? EngineGame { get; set; }
 
+    public Deck Deck { get; } = new();
+    
     public void AddPlayer(Player player) => _players.Add(player.Id, player);
 
     public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
