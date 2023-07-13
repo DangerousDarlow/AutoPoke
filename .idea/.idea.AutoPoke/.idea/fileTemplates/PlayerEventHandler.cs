@@ -17,10 +17,10 @@ public class $HANDLER : IPlayerEventHandler
 
     public IPlayer Player { get; set; } = null!;
 
-    public Type TypeHandled => typeof(($Event);
+    public Type TypeHandled => typeof($Event);
 
     public void HandleEvent(IEvent @event)
     {
-        var castEvent = (($Event) @event;
+        var castEvent = ($Event) @event;
     }
 }
