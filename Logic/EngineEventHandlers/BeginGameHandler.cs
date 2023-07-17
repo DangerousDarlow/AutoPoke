@@ -29,7 +29,6 @@ public class BeginGameHandler : IEngineEventHandler
         {
             Game = new Game
             {
-                Sequence = currentGame?.Game.Sequence + 1 ?? 1,
                 Players = Engine.Players.Values.ToImmutableList(),
                 StartingStack = Engine.Configuration.StartingStack
             }

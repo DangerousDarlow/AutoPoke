@@ -151,8 +151,7 @@ public class EngineTests
         Assert.That(gameStarted, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(gameStarted!.Game.Sequence, Is.EqualTo(1));
-            Assert.That(gameStarted.Game.Players, Is.EquivalentTo(_players.Values));
+            Assert.That(gameStarted!.Game.Players, Is.EquivalentTo(_players.Values));
             Assert.That(gameStarted.Game.StartingStack, Is.EqualTo(_engine.Configuration.StartingStack));
         });
 

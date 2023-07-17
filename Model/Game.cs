@@ -8,8 +8,6 @@ public record Game
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public Guid Id { get; init; } = Guid.NewGuid();
 
-    public int Sequence { get; init; }
-
     public IImmutableList<Player> Players { get; init; } = null!;
 
     public int StartingStack { get; init; }
