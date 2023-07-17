@@ -16,6 +16,8 @@ public interface IEngine
 
     Game? Game { get; set; }
 
+    Hand? Hand { get; set; }
+
     Deck Deck { get; }
 
     void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent;
@@ -26,11 +28,15 @@ public interface IEngine
 
     void AddPlayer(Guid playerId, string playerName);
 
-    void InitialisePlayersForNewGame();
+    void ResetPlayersForNewGame();
+
+    void MoveFirstPlayerToLast();
 }
 
 public class Engine : IEngine
 {
+    private static readonly Random Random = new();
+
     private readonly Dictionary<Type, IEngineEventHandler> _eventHandlers;
     private readonly ILogger<Engine> _logger;
     private readonly IServer _server;
@@ -56,11 +62,26 @@ public class Engine : IEngine
 
     public Game? Game { get; set; }
 
+    public Hand? Hand { get; set; }
+
     public Deck Deck { get; } = new();
 
     public void AddPlayer(Guid playerId, string playerName) => _players.Add(new Player {Id = playerId, Name = playerName, Stack = Configuration.StartingStack});
 
-    public void InitialisePlayersForNewGame() => _players = _players.Select(player => player.WithStack(Configuration.StartingStack)).ToList();
+    public void ResetPlayersForNewGame()
+    {
+        _players = _players.Select(player => player.WithStack(Configuration.StartingStack)).ToList();
+        _players.Shuffle(Random);
+    }
+
+    public void MoveFirstPlayerToLast()
+    {
+        if (_players.Count < 2) return;
+
+        var player = _players.First();
+        _players.Remove(player);
+        _players.Add(player);
+    }
 
     public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
     {

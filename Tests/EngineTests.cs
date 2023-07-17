@@ -8,9 +8,9 @@ namespace Tests;
 public class EngineTests
 {
     private IEngine _engine = null!;
-    private IServer _server = null!;
     private MockZeroMq _mockZeroMq = null!;
     private Dictionary<Guid, Player> _players = null!;
+    private IServer _server = null!;
 
     private MockSocket Server => _mockZeroMq.GetServer();
 
@@ -133,6 +133,13 @@ public class EngineTests
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(3), "Additional responses sent");
     }
 
+    private void HandleFromSelf<T>(T @event) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        envelope.Origin = _server.Id;
+        Server.Handle(envelope);
+    }
+
     [Test]
     public void Game_can_be_started()
     {
@@ -141,9 +148,7 @@ public class EngineTests
 
         CreateAndJoinMaximumPlayers();
 
-        var envelope = Envelope.CreateFromEvent(new BeginGame());
-        envelope.Origin = _server.Id;
-        Server.Handle(envelope);
+        HandleFromSelf(new BeginGame());
 
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(2), "Engine has not sent responses");
 
@@ -173,9 +178,7 @@ public class EngineTests
 
         CreateAndJoinMaximumPlayers();
 
-        var envelope = Envelope.CreateFromEvent(new BeginHand());
-        envelope.Origin = _server.Id;
-        Server.Handle(envelope);
+        HandleFromSelf(new BeginHand());
 
         // JoinResponse & HoleCards for each player
         var expectedNumberOfEventsSendToSingleClients = _players.Count * 2;
@@ -211,5 +214,45 @@ public class EngineTests
 
         Server.Handle(new BeginHand());
         Assert.That(Server.SentToAllClients, Is.Empty, "Engine has not ignored BeginHand");
+    }
+
+    [Test]
+    public void Players_rotate_with_every_hand()
+    {
+        // When engine receives BeginHand
+        // Players are rotated so the first player is now the last player
+
+        CreateAndJoinMaximumPlayers();
+
+        HandleFromSelf(new BeginHand());
+
+        var firstHandStarted = Server.SentToAllClients.LastOrDefault(@event => @event.GetType() == typeof(HandStarted)) as HandStarted;
+        Assert.That(firstHandStarted, Is.Not.Null);
+        var firstPlayers = firstHandStarted!.Hand.Players;
+        Assert.That(firstPlayers, Is.Not.Null);
+        Assert.That(firstPlayers.Count, Is.EqualTo(_players.Count));
+
+        HandleFromSelf(new BeginHand());
+
+        var secondHandStarted = Server.SentToAllClients.LastOrDefault(@event => @event.GetType() == typeof(HandStarted)) as HandStarted;
+        Assert.That(secondHandStarted, Is.Not.Null);
+        var secondPlayers = secondHandStarted!.Hand.Players;
+        Assert.That(secondPlayers, Is.Not.Null);
+        Assert.That(secondPlayers.Count, Is.EqualTo(_players.Count));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_players, Has.Count.EqualTo(10));
+            Assert.That(firstPlayers[0].Id, Is.EqualTo(secondPlayers[9].Id));
+            Assert.That(firstPlayers[1].Id, Is.EqualTo(secondPlayers[0].Id));
+            Assert.That(firstPlayers[2].Id, Is.EqualTo(secondPlayers[1].Id));
+            Assert.That(firstPlayers[3].Id, Is.EqualTo(secondPlayers[2].Id));
+            Assert.That(firstPlayers[4].Id, Is.EqualTo(secondPlayers[3].Id));
+            Assert.That(firstPlayers[5].Id, Is.EqualTo(secondPlayers[4].Id));
+            Assert.That(firstPlayers[6].Id, Is.EqualTo(secondPlayers[5].Id));
+            Assert.That(firstPlayers[7].Id, Is.EqualTo(secondPlayers[6].Id));
+            Assert.That(firstPlayers[8].Id, Is.EqualTo(secondPlayers[7].Id));
+            Assert.That(firstPlayers[9].Id, Is.EqualTo(secondPlayers[8].Id));
+        });
     }
 }

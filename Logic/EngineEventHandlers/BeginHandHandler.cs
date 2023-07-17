@@ -23,6 +23,7 @@ public class BeginHandHandler : IEngineEventHandler
     public void HandleEvent(IEvent @event)
     {
         Engine.Deck.Reset();
+        Engine.MoveFirstPlayerToLast();
 
         foreach (var player in Engine.Players)
         {
@@ -30,6 +31,14 @@ public class BeginHandHandler : IEngineEventHandler
             _logger.LogDebug("Hole cards dealt to player '{PlayerId}'", player.Id);
         }
 
-        Engine.SendToAllClients(new HandStarted());
+        Engine.Hand = new Hand
+        {
+            Players = Engine.Players
+        };
+
+        Engine.SendToAllClients(new HandStarted
+        {
+            Hand = Engine.Hand
+        });
     }
 }

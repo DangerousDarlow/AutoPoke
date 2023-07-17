@@ -22,14 +22,13 @@ public class BeginGameHandler : IEngineEventHandler
 
     public void HandleEvent(IEvent @event)
     {
-        Engine.InitialisePlayersForNewGame();
+        Engine.ResetPlayersForNewGame();
 
         Engine.Game = new Game();
 
         Engine.SendToAllClients(new GameStarted
         {
-            Game = Engine.Game,
-            Players = Engine.Players
+            Game = Engine.Game
         });
 
         _logger.LogDebug("Game '{GameId}' started", Engine.Game.Id);
