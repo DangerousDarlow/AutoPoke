@@ -31,7 +31,7 @@ public class JoinRequestHandler : IEngineEventHandler
             return;
         }
 
-        Engine.AddPlayer(new Player {Id = joinRequest.PlayerId, Name = joinRequest.PlayerName});
+        Engine.AddPlayer(joinRequest.PlayerId, joinRequest.PlayerName);
 
         Engine.SendToSingleClient(new JoinResponse {Status = JoinResponseStatus.Success}, joinRequest.PlayerId);
         _logger.LogInformation("Player '{PlayerName}' joined", joinRequest.PlayerName);

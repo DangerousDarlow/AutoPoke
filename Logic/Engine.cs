@@ -10,11 +10,11 @@ public interface IEngine
 {
     EngineConfiguration Configuration { get; }
 
-    ImmutableDictionary<Guid, Player> Players { get; }
+    ImmutableList<Player> Players { get; }
 
     EngineSession? EngineSession { get; set; }
 
-    EngineGame? EngineGame { get; set; }
+    Game? Game { get; set; }
 
     Deck Deck { get; }
 
@@ -24,15 +24,17 @@ public interface IEngine
 
     void SendToSelf<T>(T @event) where T : IEvent;
 
-    void AddPlayer(Player player);
+    void AddPlayer(Guid playerId, string playerName);
+
+    void InitialisePlayersForNewGame();
 }
 
 public class Engine : IEngine
 {
     private readonly Dictionary<Type, IEngineEventHandler> _eventHandlers;
     private readonly ILogger<Engine> _logger;
-    private readonly Dictionary<Guid, Player> _players = new();
     private readonly IServer _server;
+    private List<Player> _players = new();
 
     public Engine(IServer server, IEnumerable<IEngineEventHandler> eventHandlers, IOptions<EngineConfiguration> configuration, ILogger<Engine> logger)
     {
@@ -48,15 +50,17 @@ public class Engine : IEngine
 
     public EngineConfiguration Configuration { get; }
 
-    public ImmutableDictionary<Guid, Player> Players => _players.ToImmutableDictionary();
+    public ImmutableList<Player> Players => _players.ToImmutableList();
 
     public EngineSession? EngineSession { get; set; }
 
-    public EngineGame? EngineGame { get; set; }
+    public Game? Game { get; set; }
 
     public Deck Deck { get; } = new();
-    
-    public void AddPlayer(Player player) => _players.Add(player.Id, player);
+
+    public void AddPlayer(Guid playerId, string playerName) => _players.Add(new Player {Id = playerId, Name = playerName, Stack = Configuration.StartingStack});
+
+    public void InitialisePlayersForNewGame() => _players = _players.Select(player => player.WithStack(Configuration.StartingStack)).ToList();
 
     public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
     {
@@ -84,7 +88,7 @@ public class Engine : IEngine
         {
             if (handler.OriginFilter == OriginFilter.EngineOnly && envelope.Origin != _server.Id)
             {
-                _players.TryGetValue(envelope.Origin, out var player);
+                var player = _players.FirstOrDefault(p => p.Id == envelope.Origin);
                 _logger.LogError(
                     "Event type {EventType} origin is player ({PlayerId} {PlayerName}) but must be engine",
                     @event.GetType().Name, envelope.Origin, player?.Name ?? "Unknown");

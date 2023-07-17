@@ -24,7 +24,7 @@ public class BeginHandHandler : IEngineEventHandler
     {
         Engine.Deck.Reset();
 
-        foreach (var player in Engine.Players.Values)
+        foreach (var player in Engine.Players)
         {
             Engine.SendToSingleClient(new HoleCards(Engine.Deck.Draw(), Engine.Deck.Draw()), player.Id);
             _logger.LogDebug("Hole cards dealt to player '{PlayerId}'", player.Id);

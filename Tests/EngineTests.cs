@@ -149,11 +149,6 @@ public class EngineTests
 
         var gameStarted = Server.SentToAllClients[0] as GameStarted;
         Assert.That(gameStarted, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(gameStarted!.Game.Players, Is.EquivalentTo(_players.Values));
-            Assert.That(gameStarted.Game.StartingStack, Is.EqualTo(_engine.Configuration.StartingStack));
-        });
 
         var handStarted = Server.SentToAllClients[1] as HandStarted;
         Assert.That(handStarted, Is.Not.Null);

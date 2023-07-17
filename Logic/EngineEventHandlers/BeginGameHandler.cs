@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Model;
 
 namespace Logic.EngineEventHandlers;
@@ -23,19 +22,17 @@ public class BeginGameHandler : IEngineEventHandler
 
     public void HandleEvent(IEvent @event)
     {
-        var currentGame = Engine.EngineGame;
+        Engine.InitialisePlayersForNewGame();
 
-        Engine.EngineGame = new EngineGame
+        Engine.Game = new Game();
+
+        Engine.SendToAllClients(new GameStarted
         {
-            Game = new Game
-            {
-                Players = Engine.Players.Values.ToImmutableList(),
-                StartingStack = Engine.Configuration.StartingStack
-            }
-        };
+            Game = Engine.Game,
+            Players = Engine.Players
+        });
 
-        Engine.SendToAllClients(new GameStarted {Game = Engine.EngineGame.Game});
-        _logger.LogDebug("Game '{GameId}' started", Engine.EngineGame.Game.Id);
+        _logger.LogDebug("Game '{GameId}' started", Engine.Game.Id);
 
         Engine.SendToSelf(new BeginHand());
     }
