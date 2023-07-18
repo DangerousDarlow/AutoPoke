@@ -28,9 +28,9 @@ public interface IEngine
 
     void AddPlayer(Guid playerId, string playerName);
 
-    void ResetPlayersForNewGame();
+    void ResetForNewGame();
 
-    void MoveFirstPlayerToLast();
+    void ResetForNewHand();
 }
 
 public class Engine : IEngine
@@ -68,13 +68,19 @@ public class Engine : IEngine
 
     public void AddPlayer(Guid playerId, string playerName) => _players.Add(new Player {Id = playerId, Name = playerName, Stack = Configuration.StartingStack});
 
-    public void ResetPlayersForNewGame()
+    public void ResetForNewGame()
     {
         _players = _players.Select(player => player.WithStack(Configuration.StartingStack)).ToList();
         _players.Shuffle(Random);
     }
 
-    public void MoveFirstPlayerToLast()
+    public void ResetForNewHand()
+    {
+        Deck.Reset();
+        RotatePlayers();
+    }
+
+    private void RotatePlayers()
     {
         if (_players.Count < 2) return;
 

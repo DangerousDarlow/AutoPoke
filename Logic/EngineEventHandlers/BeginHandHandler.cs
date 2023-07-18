@@ -22,8 +22,7 @@ public class BeginHandHandler : IEngineEventHandler
 
     public void HandleEvent(IEvent @event)
     {
-        Engine.Deck.Reset();
-        Engine.MoveFirstPlayerToLast();
+        Engine.ResetForNewHand();
 
         foreach (var player in Engine.Players)
         {

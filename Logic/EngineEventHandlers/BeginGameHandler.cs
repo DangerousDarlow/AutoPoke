@@ -22,7 +22,7 @@ public class BeginGameHandler : IEngineEventHandler
 
     public void HandleEvent(IEvent @event)
     {
-        Engine.ResetPlayersForNewGame();
+        Engine.ResetForNewGame();
 
         Engine.Game = new Game();
 

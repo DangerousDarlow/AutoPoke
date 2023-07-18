@@ -9,7 +9,9 @@ public interface IPlayer
 {
     PlayerConfiguration Configuration { get; }
 
-    Game? CurrentGame { get; set; }
+    Game? Game { get; set; }
+
+    Hand? Hand { get; set; }
 
     HoleCards? HoleCards { get; set; }
 
@@ -38,7 +40,9 @@ public class Player : IPlayer
 
     public PlayerConfiguration Configuration { get; }
 
-    public Game? CurrentGame { get; set; }
+    public Game? Game { get; set; }
+
+    public Hand? Hand { get; set; }
 
     public HoleCards? HoleCards { get; set; }
 
