@@ -230,7 +230,7 @@ public class EngineTests
         Assert.That(firstHandStarted, Is.Not.Null);
         var firstPlayers = firstHandStarted!.Hand.Players;
         Assert.That(firstPlayers, Is.Not.Null);
-        Assert.That(firstPlayers.Count, Is.EqualTo(_players.Count));
+        Assert.That(firstPlayers, Has.Count.EqualTo(_players.Count));
 
         HandleFromSelf(new BeginHand());
 
@@ -238,7 +238,7 @@ public class EngineTests
         Assert.That(secondHandStarted, Is.Not.Null);
         var secondPlayers = secondHandStarted!.Hand.Players;
         Assert.That(secondPlayers, Is.Not.Null);
-        Assert.That(secondPlayers.Count, Is.EqualTo(_players.Count));
+        Assert.That(secondPlayers, Has.Count.EqualTo(_players.Count));
 
         Assert.Multiple(() =>
         {
