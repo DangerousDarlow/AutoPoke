@@ -1,4 +1,4 @@
-﻿namespace Model;
+﻿namespace Model.Events;
 
 /// <summary>
 /// Sent by the server to all clients when a session starts

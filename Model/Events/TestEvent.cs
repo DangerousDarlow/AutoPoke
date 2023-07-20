@@ -1,4 +1,4 @@
-﻿namespace Model;
+﻿namespace Model.Events;
 
 public record TestEvent : Event
 {

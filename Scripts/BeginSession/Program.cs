@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Model;
+using Model.Events;
 using NetMQ;
 using Serilog;
 using ZeroMq;

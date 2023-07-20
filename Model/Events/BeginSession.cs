@@ -1,4 +1,4 @@
-﻿namespace Model;
+﻿namespace Model.Events;
 
 /// <summary>
 /// Triggers the server to begin a poker session

@@ -1,4 +1,4 @@
-﻿namespace Model;
+﻿namespace Model.Events;
 
 /// <summary>
 /// Sent by the server to a client in response to a <see cref="JoinRequest"/>
