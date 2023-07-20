@@ -66,11 +66,11 @@ public class Engine : IEngine
 
     public Deck Deck { get; } = new();
 
-    public void AddPlayer(Guid playerId, string playerName) => _players.Add(new Player {Id = playerId, Name = playerName, Stack = Configuration.StartingStack});
+    public void AddPlayer(Guid playerId, string playerName) => _players.Add(new Player {Id = playerId, Name = playerName, Stack = Configuration.InitialStack});
 
     public void ResetForNewGame()
     {
-        _players = _players.Select(player => player.WithStack(Configuration.StartingStack)).ToList();
+        _players = _players.Select(player => player.WithStack(Configuration.InitialStack)).ToList();
         _players.Shuffle(Random);
     }
 

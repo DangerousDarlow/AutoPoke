@@ -1,5 +1,6 @@
 ﻿using Logic;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Model;
 using ZeroMq;
 
@@ -17,6 +18,12 @@ public class EngineTests
     [SetUp]
     public void SetUp()
     {
+        var configuration = new OptionsWrapper<EngineConfiguration>(
+            new EngineConfiguration
+            {
+                HandsPerBlindLevel = 2
+            });
+
         var serviceCollection = new ServiceCollection()
             .AddSingleton<MockZeroMq>()
             .AddSingleton<IServer>(provider =>
@@ -30,6 +37,7 @@ public class EngineTests
                 var mockZeroMq = provider.GetService<MockZeroMq>()!;
                 return mockZeroMq.CreateClient();
             })
+            .AddSingleton<IOptions<EngineConfiguration>>(configuration)
             .AddSingleton<IEngine, Engine>()
             .AddAllImplementations<IEngineEventHandler>()
             .AddLogging();
@@ -44,14 +52,14 @@ public class EngineTests
     private Player CreatePlayer(string name)
     {
         var playerId = _mockZeroMq.CreateClient().Id;
-        var player = new Player {Id = playerId, Name = name};
+        var player = new Player {Id = playerId, Name = name, Stack = _engine.Configuration.InitialStack};
         _players.Add(player.Id, player);
         return player;
     }
 
     private void CreateAndJoinMaximumPlayers()
     {
-        for (var i = 0; i < _engine.Configuration.MaxPlayers; i++)
+        for (var i = 0; i < _engine.Configuration.MaximumNumberOfPlayers; i++)
         {
             var player = CreatePlayer($"Player {i}");
             Server.Handle(new JoinRequest {PlayerId = player.Id, PlayerName = player.Name});
@@ -133,13 +141,6 @@ public class EngineTests
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(3), "Additional responses sent");
     }
 
-    private void HandleFromSelf<T>(T @event) where T : IEvent
-    {
-        var envelope = Envelope.CreateFromEvent(@event);
-        envelope.Origin = _server.Id;
-        Server.Handle(envelope);
-    }
-
     [Test]
     public void Game_can_be_started()
     {
@@ -157,6 +158,13 @@ public class EngineTests
 
         var handStarted = Server.SentToAllClients[1] as HandStarted;
         Assert.That(handStarted, Is.Not.Null);
+    }
+
+    private void HandleFromSelf<T>(T @event) where T : IEvent
+    {
+        var envelope = Envelope.CreateFromEvent(@event);
+        envelope.Origin = _server.Id;
+        Server.Handle(envelope);
     }
 
     [Test]
@@ -204,6 +212,13 @@ public class EngineTests
         Assert.That(Server.SentToAllClients, Has.Count.EqualTo(1), "Engine has not sent responses");
         var handStarted = Server.SentToAllClients[0] as HandStarted;
         Assert.That(handStarted, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(handStarted!.Hand.Players, Is.EquivalentTo(_players.Values));
+            Assert.That(handStarted.Hand.Sequence, Is.EqualTo(1));
+            Assert.That(handStarted.Hand.SmallBlind, Is.EqualTo(_engine.Configuration.InitialSmallBlind));
+            Assert.That(handStarted.Hand.BigBlind, Is.EqualTo(handStarted.Hand.SmallBlind * 2));
+        });
     }
 
     [Test]
@@ -253,6 +268,42 @@ public class EngineTests
             Assert.That(firstPlayers[7].Id, Is.EqualTo(secondPlayers[6].Id));
             Assert.That(firstPlayers[8].Id, Is.EqualTo(secondPlayers[7].Id));
             Assert.That(firstPlayers[9].Id, Is.EqualTo(secondPlayers[8].Id));
+        });
+    }
+
+    [Test]
+    public void Blinds_change_after_a_configurable_number_of_hands()
+    {
+        // When engine receives BeginHand
+        // 
+
+        CreateAndJoinMaximumPlayers();
+
+        Assert.That(_engine.Configuration.HandsPerBlindLevel, Is.EqualTo(2));
+
+        // First hand
+        HandleFromSelf(new BeginHand());
+        AssertLastHandSequenceAndBlinds(1, _engine.Configuration.InitialSmallBlind);
+
+        // Second hand
+        HandleFromSelf(new BeginHand());
+        AssertLastHandSequenceAndBlinds(2, _engine.Configuration.InitialSmallBlind);
+
+        // Third hand
+        HandleFromSelf(new BeginHand());
+        AssertLastHandSequenceAndBlinds(3, _engine.Configuration.InitialSmallBlind * 2);
+    }
+
+    private void AssertLastHandSequenceAndBlinds(int sequence, int smallBlind)
+    {
+        Assert.That(Server.SentToAllClients, Has.Count.EqualTo(sequence));
+        var handStarted = Server.SentToAllClients.Last() as HandStarted;
+        Assert.That(handStarted, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(handStarted!.Hand.Sequence, Is.EqualTo(sequence));
+            Assert.That(handStarted.Hand.SmallBlind, Is.EqualTo(smallBlind));
+            Assert.That(handStarted.Hand.BigBlind, Is.EqualTo(handStarted.Hand.SmallBlind * 2));
         });
     }
 }

@@ -30,9 +30,15 @@ public class BeginHandHandler : IEngineEventHandler
             _logger.LogDebug("Hole cards dealt to player '{PlayerId}'", player.Id);
         }
 
+        var sequence = Engine.Hand?.Sequence + 1 ?? 1;
+        var multiplier = (sequence - 1) / Engine.Configuration.HandsPerBlindLevel + 1;
+        var blind = Engine.Configuration.InitialSmallBlind * multiplier;
+
         Engine.Hand = new Hand
         {
-            Players = Engine.Players
+            Players = Engine.Players,
+            Sequence = sequence,
+            SmallBlind = blind
         };
 
         Engine.SendToAllClients(new HandStarted

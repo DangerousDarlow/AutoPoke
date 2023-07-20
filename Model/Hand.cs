@@ -9,4 +9,10 @@ public record Hand
     public Guid Id { get; init; } = Guid.NewGuid();
 
     public ImmutableList<Player> Players { get; init; } = null!;
+
+    public int Sequence { get; init; }
+
+    public int SmallBlind { get; init; }
+
+    public int BigBlind => SmallBlind * 2;
 }

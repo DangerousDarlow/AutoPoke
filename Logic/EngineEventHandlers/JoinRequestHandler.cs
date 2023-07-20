@@ -24,7 +24,7 @@ public class JoinRequestHandler : IEngineEventHandler
     {
         var joinRequest = (JoinRequest) @event;
 
-        if (Engine.Players.Count >= Engine.Configuration.MaxPlayers)
+        if (Engine.Players.Count >= Engine.Configuration.MaximumNumberOfPlayers)
         {
             Engine.SendToSingleClient(new JoinResponse {Status = JoinResponseStatus.FailureEngineFull}, joinRequest.PlayerId);
             _logger.LogInformation("Player '{PlayerName}' tried to join, but engine is full", joinRequest.PlayerName);
