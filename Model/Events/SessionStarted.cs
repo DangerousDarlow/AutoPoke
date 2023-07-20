@@ -1,7 +1,7 @@
 ﻿namespace Model.Events;
 
 /// <summary>
-/// Sent by the server to all clients when a session starts
+/// Sent from the engine to all players when a session starts
 /// </summary>
 public record SessionStarted : Event
 {

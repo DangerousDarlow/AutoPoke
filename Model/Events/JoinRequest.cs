@@ -1,7 +1,7 @@
 ﻿namespace Model.Events;
 
 /// <summary>
-/// Sent by a client to the server when requesting to join a session
+/// Sent from a player to the engine to request to join the game
 /// </summary>
 public record JoinRequest : Event
 {

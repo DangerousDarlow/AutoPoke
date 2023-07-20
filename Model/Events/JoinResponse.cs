@@ -1,7 +1,7 @@
 ﻿namespace Model.Events;
 
 /// <summary>
-/// Sent by the server to a client in response to a <see cref="JoinRequest"/>
+/// Sent from the engine to a player in response to a <see cref="JoinRequest"/>
 /// </summary>
 public record JoinResponse : Event
 {
