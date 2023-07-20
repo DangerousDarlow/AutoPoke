@@ -2,5 +2,5 @@
 
 public abstract record Event : IEvent
 {
-    public Guid EventId { get; init; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
 }
