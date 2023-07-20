@@ -276,7 +276,8 @@ public class EngineTests
     public void Blinds_change_after_a_configurable_number_of_hands()
     {
         // When engine receives BeginHand
-        // 
+        // Hand sequence is incremented
+        // And small blind is incremented after a configurable number of hands
 
         CreateAndJoinMaximumPlayers();
 
