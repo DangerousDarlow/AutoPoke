@@ -4,9 +4,11 @@ namespace Client;
 
 public interface IPlayerEventHandler
 {
+    Type TypeHandled { get; }
+
     IPlayer Player { set; }
 
-    Type TypeHandled { get; }
+    IStrategy Strategy { set; }
 
     void HandleEvent(IEvent @event);
 }

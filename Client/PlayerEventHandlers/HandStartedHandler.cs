@@ -16,6 +16,8 @@ public class HandStartedHandler : IPlayerEventHandler
     }
 
     public IPlayer Player { get; set; } = null!;
+    
+    public IStrategy Strategy { get; set; } = null!;
 
     public Type TypeHandled => typeof(HandStarted);
 

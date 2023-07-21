@@ -7,15 +7,7 @@ using Serilog;
 using Shared;
 using ZeroMq;
 
-Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{SourceContext}>{NewLine}{Exception}"
-    )
-    .CreateLogger();
-
 using var host = Host.CreateDefaultBuilder(args)
-    .UseSerilog()
     .ConfigureAppConfiguration(builder => builder.AddJsonFile(args.Length > 0 ? args[0] : "appsettings.json"))
     .ConfigureServices((context, services) =>
     {
@@ -32,7 +24,9 @@ using var host = Host.CreateDefaultBuilder(args)
         });
         services.AddSingleton<IPlayer, Player>();
         services.AddAllImplementations<IPlayerEventHandler>();
+        services.AddAllImplementations<IStrategy>();
     })
+    .UseSerilog((context, loggerConfiguration) => { loggerConfiguration.ReadFrom.Configuration(context.Configuration); })
     .Build();
 
 var poller = host.Services.GetService<NetMQPoller>();

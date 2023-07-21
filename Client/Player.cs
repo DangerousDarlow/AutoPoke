@@ -8,6 +8,8 @@ namespace Client;
 
 public interface IPlayer
 {
+    Guid Id { get; }
+
     PlayerConfiguration Configuration { get; }
 
     Game? Game { get; set; }
@@ -15,6 +17,8 @@ public interface IPlayer
     Hand? Hand { get; set; }
 
     HoleCards? HoleCards { get; set; }
+
+    IStrategy Strategy { get; set; }
 
     void Join();
 
@@ -27,17 +31,32 @@ public class Player : IPlayer
     private readonly Dictionary<Type, IPlayerEventHandler> _eventHandlers;
     private readonly ILogger<Player> _logger;
 
-    public Player(IClient client, IEnumerable<IPlayerEventHandler> eventHandlers, IOptions<PlayerConfiguration> configuration, ILogger<Player> logger)
+    public Player(
+        IClient client,
+        IEnumerable<IPlayerEventHandler> eventHandlers,
+        IEnumerable<IStrategy> strategies,
+        IOptions<PlayerConfiguration> configuration,
+        ILogger<Player> logger)
     {
         _client = client;
         _logger = logger;
         _client.ReceivedEvent += HandleEvent;
 
+        var strategy = strategies.FirstOrDefault(x => x.GetType().Name == configuration.Value.Strategy);
+        Strategy = strategy ?? throw new InvalidOperationException($"No strategy found with name {configuration.Value.Strategy}");
+        strategy.Player = this;
+
         _eventHandlers = eventHandlers.ToDictionary(x => x.TypeHandled);
-        foreach (var handler in _eventHandlers.Values) handler.Player = this;
+        foreach (var handler in _eventHandlers.Values)
+        {
+            handler.Player = this;
+            handler.Strategy = strategy;
+        }
 
         Configuration = configuration.Value;
     }
+
+    public Guid Id => _client.Id;
 
     public PlayerConfiguration Configuration { get; }
 
@@ -46,6 +65,8 @@ public class Player : IPlayer
     public Hand? Hand { get; set; }
 
     public HoleCards? HoleCards { get; set; }
+
+    public IStrategy Strategy { get; set; }
 
     public void Join() => Send(new JoinRequest {PlayerId = _client.Id, PlayerName = Configuration.Name});
 

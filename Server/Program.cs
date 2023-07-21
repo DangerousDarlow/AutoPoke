@@ -7,15 +7,7 @@ using Server;
 using Shared;
 using ZeroMq;
 
-Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{SourceContext}>{NewLine}{Exception}"
-    )
-    .CreateLogger();
-
 using var host = Host.CreateDefaultBuilder(args)
-    .UseSerilog()
     .ConfigureAppConfiguration(builder => builder.AddJsonFile("appsettings.json"))
     .ConfigureServices((context, services) =>
     {
@@ -33,6 +25,7 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IEngine, Engine>();
         services.AddAllImplementations<IEngineEventHandler>();
     })
+    .UseSerilog((context, loggerConfiguration) => { loggerConfiguration.ReadFrom.Configuration(context.Configuration); })
     .Build();
 
 var poller = host.Services.GetService<NetMQPoller>();

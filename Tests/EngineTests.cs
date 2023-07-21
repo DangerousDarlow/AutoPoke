@@ -132,7 +132,7 @@ public class EngineTests
     [Test]
     public void Session_cannot_be_started_if_already_started()
     {
-        // Given a session has started
+        // Given session has started
         // When engine receives BeginSession
         // Then engine does not respond
 

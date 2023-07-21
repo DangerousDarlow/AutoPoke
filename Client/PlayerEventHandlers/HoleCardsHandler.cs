@@ -16,12 +16,14 @@ public class HoleCardsHandler : IPlayerEventHandler
     }
 
     public IPlayer Player { get; set; } = null!;
+    
+    public IStrategy Strategy { get; set; } = null!;
 
     public Type TypeHandled => typeof(HoleCards);
 
     public void HandleEvent(IEvent @event)
     {
         Player.HoleCards = (HoleCards) @event;
-        _logger.LogDebug("Hole cards received");
+        _logger.LogDebug("Hole cards '{HoleCards}' received", Player.HoleCards);
     }
 }

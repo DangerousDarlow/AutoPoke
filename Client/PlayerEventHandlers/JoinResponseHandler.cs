@@ -17,6 +17,8 @@ public class JoinResponseHandler : IPlayerEventHandler
 
     public IPlayer Player { get; set; } = null!;
 
+    public IStrategy Strategy { get; set; } = null!;
+
     public Type TypeHandled => typeof(JoinResponse);
 
     public void HandleEvent(IEvent @event)
