@@ -1,6 +1,7 @@
 #set ($HANDLER = "${Event}Handler")
 using Microsoft.Extensions.Logging;
 using Model;
+using Model.Events;
 
 namespace Logic.EngineEventHandlers;
 
