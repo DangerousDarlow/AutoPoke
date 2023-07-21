@@ -4,7 +4,4 @@
 /// Triggers a player to act
 /// Sent from the engine to a single player
 /// </summary>
-public record ActionOn : Event
-{
-    public Guid Player { get; init; }
-}
+public record ActionOn : Event;

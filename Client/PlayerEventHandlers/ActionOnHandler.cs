@@ -25,12 +25,11 @@ public class ActionOnHandler : IPlayerEventHandler
     {
         var actionOn = (ActionOn) @event;
 
-        if (actionOn.Player != Player.Id) return;
         _logger.LogDebug("ActionOn {ActionOnId} received", actionOn.Id);
 
         var action = Strategy.Action();
 
-        Player.Send(new ActionOnResponse {ActionOn = actionOn.Id, Action = action});
+        Player.Send(new ActionOnResponse {ResponseTo = actionOn.Id, Action = action});
         _logger.LogDebug("ActionOnResponse for {ActionOnId} sent: {Action}", actionOn.Id, action);
     }
 }

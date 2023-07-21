@@ -53,7 +53,8 @@ public class PlayerTests
         // Then action is determined by strategy
         // And player responds with ActionOnResponse
 
-        Client.Handle(new ActionOn {Player = _player.Id});
+        var actionOn = new ActionOn();
+        Client.Handle(actionOn);
 
         var strategy = _player.Strategy as TestStrategy;
         Assert.That(strategy, Is.Not.Null);
@@ -62,19 +63,7 @@ public class PlayerTests
         Assert.That(Client.SentToServer, Has.Count.EqualTo(1));
         var actionOnResponse = Client.SentToServer[0] as ActionOnResponse;
         Assert.That(actionOnResponse, Is.Not.Null);
-    }
-
-    [Test]
-    public void ActionOn_is_not_actioned_if_it_is_not_for_the_player()
-    {
-        // When the player receives an ActionOn event not for them
-        // Then the strategy's Action method is not called
-
-        Client.Handle(new ActionOn());
-
-        var strategy = _player.Strategy as TestStrategy;
-        Assert.That(strategy, Is.Not.Null);
-        Assert.That(strategy!.ActionCalled, Is.False);
+        Assert.That(actionOnResponse!.ResponseTo, Is.EqualTo(actionOn.Id));
     }
 }
 

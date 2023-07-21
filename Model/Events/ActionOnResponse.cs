@@ -6,7 +6,10 @@
 /// </summary>
 public record ActionOnResponse : Event
 {
-    public Guid ActionOn { get; init; }
+    /// <summary>
+    /// Id of the ActionOn event this is a response to
+    /// </summary>
+    public Guid ResponseTo { get; init; }
 
     public Action Action { get; init; }
 }
