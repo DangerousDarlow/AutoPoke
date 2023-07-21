@@ -15,11 +15,11 @@ public class ActionOnHandler : IPlayerEventHandler
         _logger = logger;
     }
 
+    public Type TypeHandled => typeof(ActionOn);
+    
     public IPlayer Player { get; set; } = null!;
 
     public IStrategy Strategy { get; set; } = null!;
-
-    public Type TypeHandled => typeof(ActionOn);
 
     public void HandleEvent(IEvent @event)
     {

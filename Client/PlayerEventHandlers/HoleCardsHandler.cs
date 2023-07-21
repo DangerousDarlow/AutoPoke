@@ -15,11 +15,11 @@ public class HoleCardsHandler : IPlayerEventHandler
         _logger = logger;
     }
 
-    public IPlayer Player { get; set; } = null!;
-    
-    public IStrategy Strategy { get; set; } = null!;
-
     public Type TypeHandled => typeof(HoleCards);
+
+    public IPlayer Player { get; set; } = null!;
+
+    public IStrategy Strategy { get; set; } = null!;
 
     public void HandleEvent(IEvent @event)
     {
