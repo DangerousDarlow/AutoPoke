@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Model;
 using ZeroMq;
 
-namespace Logic;
+namespace Server;
 
 public interface IEngine
 {

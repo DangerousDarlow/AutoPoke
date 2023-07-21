@@ -1,4 +1,4 @@
-﻿namespace Logic;
+﻿namespace Server;
 
 public record EngineConfiguration
 {

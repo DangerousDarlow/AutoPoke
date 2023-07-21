@@ -1,5 +1,5 @@
-﻿using Logic;
-using Model;
+﻿using Model;
+using Server;
 
 namespace Tests;
 

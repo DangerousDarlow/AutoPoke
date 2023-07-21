@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Logic;
+namespace Server;
 
 public static class ServiceCollectionExtensions
 {

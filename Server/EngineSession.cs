@@ -1,6 +1,6 @@
 ﻿using Model;
 
-namespace Logic;
+namespace Server;
 
 public record EngineSession
 {

@@ -2,7 +2,7 @@
 using Model;
 using Model.Events;
 
-namespace Logic.EngineEventHandlers;
+namespace Server.EngineEventHandlers;
 
 // Class is used via reflection
 // ReSharper disable once UnusedType.Global

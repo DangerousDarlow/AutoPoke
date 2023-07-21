@@ -1,4 +1,4 @@
-﻿namespace Logic;
+﻿namespace Server;
 
 /// <summary>
 /// Implements the Fisher-Yates shuffle algorithm

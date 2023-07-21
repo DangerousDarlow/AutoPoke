@@ -19,7 +19,7 @@ public class ZeroMqTests
     private ZeroMq.Client _client2 = null!;
     private NetMQPoller _poller = null!;
     private Router _router = null!;
-    private Server _server = null!;
+    private ZeroMq.Server _server = null!;
     private Publisher _serverPublisher = null!;
 
     [SetUp]
@@ -34,7 +34,7 @@ public class ZeroMqTests
 
         _router = new Router(_poller, ServerConfiguration, routerLogger.Object);
         _serverPublisher = new Publisher(_poller, ServerConfiguration, publisherLogger.Object);
-        _server = new Server(_router, _serverPublisher);
+        _server = new ZeroMq.Server(_router, _serverPublisher);
         _server.Configure();
 
         var dealerLogger = new Mock<ILogger<Dealer>>();

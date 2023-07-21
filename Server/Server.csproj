@@ -22,7 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Logic\Logic.csproj" />
       <ProjectReference Include="..\ZeroMq\ZeroMq.csproj" />
     </ItemGroup>
 

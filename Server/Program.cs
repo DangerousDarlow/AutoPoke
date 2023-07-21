@@ -1,9 +1,9 @@
-﻿using Logic;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
 using Serilog;
+using Server;
 using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()
@@ -23,9 +23,9 @@ using var host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<NetMQPoller>();
         services.AddSingleton<Router>();
         services.AddSingleton<Publisher>();
-        services.AddSingleton<IServer, Server>(provider =>
+        services.AddSingleton<IServer, ZeroMq.Server>(provider =>
         {
-            var server = new Server(provider.GetRequiredService<Router>(), provider.GetRequiredService<Publisher>());
+            var server = new ZeroMq.Server(provider.GetRequiredService<Router>(), provider.GetRequiredService<Publisher>());
             server.Configure();
             return server;
         });
