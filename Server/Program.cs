@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using NetMQ;
 using Serilog;
 using Server;
+using Shared;
 using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()

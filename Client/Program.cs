@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NetMQ;
 using Serilog;
+using Shared;
 using ZeroMq;
 
 Log.Logger = new LoggerConfiguration()
@@ -30,7 +31,7 @@ using var host = Host.CreateDefaultBuilder(args)
             return client;
         });
         services.AddSingleton<IPlayer, Player>();
-        services.AddAllImplementationsInNamespace<IPlayerEventHandler>("Client.PlayerEventHandlers");
+        services.AddAllImplementations<IPlayerEventHandler>();
     })
     .Build();
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Model;
 using Model.Events;
 using Server;
+using Shared;
 using ZeroMq;
 
 namespace Tests;
