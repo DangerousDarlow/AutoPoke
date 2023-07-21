@@ -80,15 +80,6 @@ public class Engine : IEngine
         RotatePlayers();
     }
 
-    private void RotatePlayers()
-    {
-        if (_players.Count < 2) return;
-
-        var player = _players.First();
-        _players.Remove(player);
-        _players.Add(player);
-    }
-
     public void SendToSingleClient<T>(T @event, Guid playerId) where T : IEvent
     {
         var envelope = Envelope.CreateFromEvent(@event);
@@ -106,6 +97,15 @@ public class Engine : IEngine
         var envelope = Envelope.CreateFromEvent(@event);
         envelope.Origin = _server.Id;
         HandleEvent(envelope);
+    }
+
+    private void RotatePlayers()
+    {
+        if (_players.Count < 2) return;
+
+        var player = _players.First();
+        _players.Remove(player);
+        _players.Add(player);
     }
 
     private void HandleEvent(Envelope envelope)
