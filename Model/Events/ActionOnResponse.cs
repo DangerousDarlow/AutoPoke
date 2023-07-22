@@ -11,5 +11,5 @@ public record ActionOnResponse : Event
     /// </summary>
     public Guid ResponseTo { get; init; }
 
-    public Action Action { get; init; }
+    public Action Action { get; init; } = null!;
 }
