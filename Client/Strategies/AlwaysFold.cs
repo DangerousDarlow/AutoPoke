@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Model;
 using Action = Model.Action;
 
 namespace Client.Strategies;
@@ -16,5 +17,5 @@ public class AlwaysFold : IStrategy
 
     public IPlayer Player { get; set; } = null!;
 
-    public Action Action() => Model.Action.Fold;
+    public Action Action() => new() {Type = ActionType.Fold};
 }
