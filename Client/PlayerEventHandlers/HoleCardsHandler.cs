@@ -24,6 +24,6 @@ public class HoleCardsHandler : IPlayerEventHandler
     public void HandleEvent(IEvent @event)
     {
         Player.HoleCards = (HoleCards) @event;
-        _logger.LogDebug("Hole cards '{HoleCards}' received", Player.HoleCards);
+        _logger.LogDebug("Hole cards {HoleCards} received", Player.HoleCards);
     }
 }

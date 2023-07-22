@@ -32,7 +32,7 @@ public class BeginGameHandler : IEngineEventHandler
             Game = Engine.Game
         });
 
-        _logger.LogDebug("Game '{GameId}' started", Engine.Game.Id);
+        _logger.LogDebug("Game {GameId} started", Engine.Game.Id);
 
         Engine.SendToSelf(new BeginHand());
     }

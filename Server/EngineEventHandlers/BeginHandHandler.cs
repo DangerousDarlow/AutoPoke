@@ -28,7 +28,7 @@ public class BeginHandHandler : IEngineEventHandler
         foreach (var player in Engine.Players)
         {
             Engine.SendToSingleClient(new HoleCards(Engine.Deck.Draw(), Engine.Deck.Draw()), player.Id);
-            _logger.LogDebug("Hole cards dealt to player '{PlayerId}'", player.Id);
+            _logger.LogDebug("Hole cards dealt to player {PlayerId}", player.Id);
         }
 
         var sequence = Engine.Hand?.Sequence + 1 ?? 1;

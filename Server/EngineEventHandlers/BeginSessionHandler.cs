@@ -37,7 +37,7 @@ public class BeginSessionHandler : IEngineEventHandler
         };
 
         Engine.SendToAllClients(new SessionStarted {Session = Engine.EngineSession.Session});
-        _logger.LogInformation("Session '{SessionId}' started: {Games} games", Engine.EngineSession.Session.Id, Engine.EngineSession.Session.Games);
+        _logger.LogInformation("Session {SessionId} started: {Games} games", Engine.EngineSession.Session.Id, Engine.EngineSession.Session.Games);
 
         Engine.SendToSelf(new BeginGame());
     }

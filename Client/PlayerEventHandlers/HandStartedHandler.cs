@@ -25,6 +25,6 @@ public class HandStartedHandler : IPlayerEventHandler
     {
         var handStarted = (HandStarted) @event;
         Player.Hand = handStarted.Hand;
-        _logger.LogDebug("Hand '{HandId}' started", handStarted.Hand.Id);
+        _logger.LogDebug("Hand {HandId} started", handStarted.Hand.Id);
     }
 }

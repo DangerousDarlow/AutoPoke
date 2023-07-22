@@ -25,6 +25,6 @@ public class GameStartedHandler : IPlayerEventHandler
     {
         var gameStarted = (GameStarted) @event;
         Player.Game = gameStarted.Game;
-        _logger.LogDebug("Game '{GameId}' started", gameStarted.Game.Id);
+        _logger.LogDebug("Game {GameId} started", gameStarted.Game.Id);
     }
 }

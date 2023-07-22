@@ -43,7 +43,7 @@ public class Player : IPlayer
         _client.ReceivedEvent += HandleEvent;
 
         var strategy = strategies.FirstOrDefault(x => x.GetType().Name == configuration.Value.Strategy);
-        Strategy = strategy ?? throw new InvalidOperationException($"No strategy found with name {configuration.Value.Strategy}");
+        Strategy = strategy ?? throw new InvalidOperationException($"No strategy found with name '{configuration.Value.Strategy}'");
         strategy.Player = this;
 
         _eventHandlers = eventHandlers.ToDictionary(x => x.TypeHandled);
@@ -85,7 +85,7 @@ public class Player : IPlayer
         }
         else
         {
-            _logger.LogWarning("No handler for event type {EventType}", @event.GetType().Name);
+            _logger.LogWarning("No handler for event type '{EventType}'", @event.GetType().Name);
         }
     }
 }

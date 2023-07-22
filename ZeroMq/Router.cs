@@ -34,7 +34,7 @@ public class Router : Socket
             if (envelope.Origin == from)
                 ReceivedEvent?.Invoke(envelope);
             else
-                Logger.LogWarning("Router received message from '{From}' but envelope origin is '{Origin}'", from, envelope.Origin);
+                Logger.LogWarning("Router received message from {From} but envelope origin is {Origin}", from, envelope.Origin);
         };
 
         Poller.Add(_router ?? throw new InvalidOperationException("Socket not initialized"));
