@@ -1,10 +1,14 @@
 ﻿using Client;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Model;
 using Model.Events;
+using Moq;
 using Shared;
 using ZeroMq;
 using Action = Model.Action;
+using Player = Client.Player;
 
 namespace Tests;
 
@@ -20,6 +24,7 @@ public class PlayerTests
         var configuration = new OptionsWrapper<PlayerConfiguration>(
             new PlayerConfiguration
             {
+                Name = "TestPlayer",
                 Strategy = "TestStrategy"
             });
 
@@ -65,6 +70,26 @@ public class PlayerTests
         Assert.That(actionOnResponse, Is.Not.Null);
         Assert.That(actionOnResponse!.ResponseTo, Is.EqualTo(actionOn.Id));
     }
+
+    [Test]
+    public void Player_constructor_throws_exception_if_strategy_is_not_found()
+    {
+        var logger = new Mock<ILogger<Player>>();
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            // ReSharper disable once ObjectCreationAsStatement
+            new Player(
+                Client,
+                Enumerable.Empty<IPlayerEventHandler>(),
+                Enumerable.Empty<IStrategy>(),
+                new OptionsWrapper<PlayerConfiguration>(new PlayerConfiguration
+                {
+                    Name = "TestPlayer",
+                    Strategy = "TestStrategy"
+                }),
+                logger.Object);
+        });
+    }
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global
@@ -79,6 +104,6 @@ internal class TestStrategy : IStrategy
     public Action Action()
     {
         ActionCalled = true;
-        return Model.Action.Fold;
+        return new Action {Type = ActionType.Fold};
     }
 }
